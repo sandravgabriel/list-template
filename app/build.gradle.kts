@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -5,11 +7,11 @@ plugins {
 }
 
 android {
-    namespace = "de.gabriel.listrandomizer"
+    namespace = "de.gabriel.template"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "de.gabriel.listrandomizer"
+        applicationId = "de.gabriel.template"
         minSdk = 30
         targetSdk = 36
         versionCode = 1
@@ -31,8 +33,12 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-    kotlinOptions {
-        jvmTarget = "11"
+    kotlin {
+        target {
+            compilerOptions {
+                jvmTarget = JvmTarget.fromTarget("11")
+            }
+        }
     }
     buildFeatures {
         compose = true
@@ -40,11 +46,11 @@ android {
 }
 
 dependencies {
-
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)

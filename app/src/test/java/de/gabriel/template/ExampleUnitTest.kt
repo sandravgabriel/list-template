@@ -1,4 +1,4 @@
-package de.gabriel.listrandomizer
+package de.gabriel.template
 
 import org.junit.Test
 

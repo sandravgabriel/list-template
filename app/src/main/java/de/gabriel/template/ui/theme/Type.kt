@@ -1,4 +1,4 @@
-package de.gabriel.listrandomizer.ui.theme
+package de.gabriel.template.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
