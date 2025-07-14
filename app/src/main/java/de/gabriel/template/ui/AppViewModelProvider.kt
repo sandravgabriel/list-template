@@ -17,29 +17,23 @@ object AppViewModelProvider {
         initializer {
             ItemEditViewModel(
                 this.createSavedStateHandle(),
-                //listRandomizerApplication().container.itemsRepository
+                templateApplication().container.itemsRepository
             )
         }
         initializer {
-            //ItemEntryViewModel(listRandomizerApplication().container.itemsRepository)
-            ItemEntryViewModel()
+            ItemEntryViewModel(templateApplication().container.itemsRepository)
         }
 
         initializer {
             ItemDetailsViewModel(
                 this.createSavedStateHandle(),
-                //listRandomizerApplication().container.itemsRepository
+                templateApplication().container.itemsRepository
             )
         }
 
         initializer {
-            HomeViewModel()
+            HomeViewModel(templateApplication().container.itemsRepository)
         }
-
-        /**initializer {
-            HomeViewModel(listRandomizerApplication().container.itemsRepository)
-        }
-        **/
     }
 }
 
@@ -47,5 +41,5 @@ object AppViewModelProvider {
  * Extension function to queries for [Application] object and returns an instance of
  * [TemplateApplication].
  */
-fun CreationExtras.listRandomizerApplication(): TemplateApplication =
+fun CreationExtras.templateApplication(): TemplateApplication =
     (this[AndroidViewModelFactory.APPLICATION_KEY] as TemplateApplication)

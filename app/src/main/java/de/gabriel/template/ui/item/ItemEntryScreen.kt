@@ -62,7 +62,7 @@ fun ItemEntryScreen(
                 // change occurs, the Activity will be recreated and the rememberCoroutineScope will
                 // be cancelled - since the scope is bound to composition.
                 coroutineScope.launch {
-                    //viewModel.saveItem()
+                    viewModel.saveItem()
                     navigateBack()
                 }
             },

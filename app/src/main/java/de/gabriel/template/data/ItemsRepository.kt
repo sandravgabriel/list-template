@@ -1,6 +1,16 @@
 package de.gabriel.template.data
 
-/**
- * Repository that provides insert, update, delete, and retrieve of [Item] from a given data source.
- */
-interface ItemsRepository
+import kotlinx.coroutines.flow.Flow
+
+interface ItemsRepository{
+
+    fun getItemStream(id: Int): Flow<Item?>
+
+    fun getAllItemsStream(): Flow<List<Item>>
+
+    suspend fun insertItem(item: Item)
+
+    suspend fun updateItem(item: Item)
+
+    suspend fun deleteItem(item: Item)
+}

@@ -22,9 +22,11 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -33,11 +35,14 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
 import de.gabriel.template.TopAppBar
 import de.gabriel.template.R
 import de.gabriel.template.data.Item
+import de.gabriel.template.ui.AppViewModelProvider
 import de.gabriel.template.ui.navigation.NavigationDestination
 import de.gabriel.template.ui.theme.TemplateTheme
+import kotlinx.coroutines.launch
 
 object ItemDetailsDestination : NavigationDestination {
     override val route = "item_details"
@@ -51,8 +56,11 @@ object ItemDetailsDestination : NavigationDestination {
 fun ItemDetailsScreen(
     navigateToEditItem: (Int) -> Unit,
     navigateBack: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    viewModel: ItemDetailsViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
+    val uiState = viewModel.uiState.collectAsState()
+    val coroutineScope = rememberCoroutineScope()
     Scaffold(
         topBar = {
             TopAppBar(
@@ -62,7 +70,7 @@ fun ItemDetailsScreen(
             )
         }, floatingActionButton = {
             FloatingActionButton(
-                onClick = { navigateToEditItem(0) },
+                onClick = { navigateToEditItem(uiState.value.itemDetails?.id ?: 0) },
                 shape = MaterialTheme.shapes.medium,
                 modifier = Modifier.padding(dimensionResource(id = R.dimen.padding_large))
 
@@ -75,8 +83,13 @@ fun ItemDetailsScreen(
         }, modifier = modifier
     ) { innerPadding ->
         ItemDetailsBody(
-            itemDetailsUiState = ItemDetailsUiState(),
-            onDelete = { },
+            itemDetailsUiState = uiState.value,
+            onDelete = {
+                    coroutineScope.launch {
+                        viewModel.deleteItem()
+                        navigateBack()
+                    }
+            },
             modifier = Modifier
                 .padding(
                     start = innerPadding.calculateStartPadding(LocalLayoutDirection.current),
@@ -100,10 +113,18 @@ private fun ItemDetailsBody(
     ) {
         var deleteConfirmationRequired by rememberSaveable { mutableStateOf(false) }
 
-        ItemDetails(
-            item = itemDetailsUiState.itemDetails.toItem(),
-            modifier = Modifier.fillMaxWidth()
-        )
+        val itemDetails = itemDetailsUiState.itemDetails
+        if (itemDetails != null) {
+            ItemDetails(
+                item = itemDetails.toItem(),
+                modifier = Modifier.fillMaxWidth()
+            )
+        } else {
+            // TODO:
+            // Optional: Zeige einen Ladeindikator oder nichts,
+            // da die Navigation bald stattfinden sollte.
+            // Text("Item wird geladen oder ist nicht verfügbar...")
+        }
         OutlinedButton(
             onClick = { deleteConfirmationRequired = true },
             shape = MaterialTheme.shapes.small,
@@ -146,7 +167,10 @@ fun ItemDetails(
             ItemDetailsRow(
                 itemDetail = item.name,
                 modifier = Modifier.padding(
-                    horizontal = dimensionResource(id = R.dimen.padding_medium)
+                    horizontal = dimensionResource(
+                        id = R.dimen
+                            .padding_medium
+                    )
                 )
             )
         }
@@ -190,7 +214,6 @@ fun ItemDetailsScreenPreview() {
     TemplateTheme {
         ItemDetailsBody(
             ItemDetailsUiState(
-                outOfStock = true,
                 itemDetails = ItemDetails(1, "Item")
             ),
             onDelete = {}

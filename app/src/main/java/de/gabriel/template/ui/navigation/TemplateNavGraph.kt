@@ -48,7 +48,7 @@ fun TemplateNavHost(
         ) {
             ItemDetailsScreen(
                 navigateToEditItem = { navController.navigate("${ItemEditDestination.route}/$it") },
-                navigateBack = { navController.navigateUp() }
+                navigateBack = { navController.popBackStack() }
             )
         }
         composable(

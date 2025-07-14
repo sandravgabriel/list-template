@@ -26,7 +26,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -49,9 +51,6 @@ object HomeDestination : NavigationDestination {
     override val titleRes = R.string.app_name
 }
 
-/**
- * Entry route for Home screen
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
@@ -60,7 +59,7 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
-    //val homeUiState by viewModel.homeUiState.collectAsState()
+    val homeUiState by viewModel.homeUiState.collectAsState()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
     Scaffold(
@@ -90,8 +89,7 @@ fun HomeScreen(
         },
     ) { innerPadding ->
         HomeBody(
-            //itemList = homeUiState.itemList,
-            itemList = listOf(),
+            itemList = homeUiState.itemList,
             onItemClick = navigateToItemUpdate,
             modifier = modifier.fillMaxSize(),
             contentPadding = innerPadding,
@@ -118,7 +116,7 @@ private fun HomeBody(
                 modifier = Modifier.padding(contentPadding),
             )
         } else {
-            SandrasList(
+            HomeList(
                 itemList = itemList,
                 onItemClick = { onItemClick(it.id) },
                 contentPadding = contentPadding,
@@ -129,7 +127,7 @@ private fun HomeBody(
 }
 
 @Composable
-private fun SandrasList(
+private fun HomeList(
     itemList: List<Item>,
     onItemClick: (Item) -> Unit,
     contentPadding: PaddingValues,
@@ -140,7 +138,7 @@ private fun SandrasList(
         contentPadding = contentPadding
     ) {
         items(items = itemList, key = { it.id }) { item ->
-            SandrasItem(item = item,
+            HomeItem(item = item,
                 modifier = Modifier
                     .padding(dimensionResource(id = R.dimen.padding_small))
                     .clickable { onItemClick(item) })
@@ -149,7 +147,7 @@ private fun SandrasList(
 }
 
 @Composable
-private fun SandrasItem(
+private fun HomeItem(
     item: Item, modifier: Modifier = Modifier
 ) {
     Card(
@@ -192,9 +190,9 @@ fun HomeBodyEmptyListPreview() {
 
 @Preview(showBackground = true)
 @Composable
-fun SandrasItemPreview() {
+fun HomeItemPreview() {
     TemplateTheme {
-        SandrasItem(
+        HomeItem(
             Item(1, "Item"),
         )
     }
