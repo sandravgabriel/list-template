@@ -14,11 +14,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import de.gabriel.template.R.string
-import de.gabriel.template.ui.navigation.TemplateNavHost
+import de.gabriel.template.ui.navigation.ListTemplateNavHost
 
 @Composable
-fun TemplateApp(navController: NavHostController = rememberNavController()) {
-    TemplateNavHost(navController = navController)
+fun ListTemplateApp(navController: NavHostController = rememberNavController()) {
+    ListTemplateNavHost(navController = navController)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

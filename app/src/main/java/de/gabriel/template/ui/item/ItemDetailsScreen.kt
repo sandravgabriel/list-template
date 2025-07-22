@@ -41,7 +41,7 @@ import de.gabriel.template.R
 import de.gabriel.template.data.Item
 import de.gabriel.template.ui.AppViewModelProvider
 import de.gabriel.template.ui.navigation.NavigationDestination
-import de.gabriel.template.ui.theme.TemplateTheme
+import de.gabriel.template.ui.theme.ListTemplateTheme
 import kotlinx.coroutines.launch
 
 object ItemDetailsDestination : NavigationDestination {
@@ -211,7 +211,7 @@ private fun DeleteConfirmationDialog(
 @Preview(showBackground = true)
 @Composable
 fun ItemDetailsScreenPreview() {
-    TemplateTheme {
+    ListTemplateTheme {
         ItemDetailsBody(
             ItemDetailsUiState(
                 itemDetails = ItemDetails(1, "Item")

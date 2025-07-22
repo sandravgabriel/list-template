@@ -12,13 +12,13 @@ pluginManagement {
     }
 }
 dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS) //TODO
     repositories {
         google()
         mavenCentral()
     }
 }
 
-rootProject.name = "Template"
+rootProject.name = "List Template"
 include(":app")
  

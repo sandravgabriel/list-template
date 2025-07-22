@@ -27,7 +27,7 @@ import de.gabriel.template.TopAppBar
 import de.gabriel.template.R
 import de.gabriel.template.ui.AppViewModelProvider
 import de.gabriel.template.ui.navigation.NavigationDestination
-import de.gabriel.template.ui.theme.TemplateTheme
+import de.gabriel.template.ui.theme.ListTemplateTheme
 import kotlinx.coroutines.launch
 
 object ItemEntryDestination : NavigationDestination {
@@ -141,7 +141,7 @@ fun ItemInputForm(
 @Preview(showBackground = true)
 @Composable
 private fun ItemEntryScreenPreview() {
-    TemplateTheme {
+    ListTemplateTheme {
         ItemEntryBody(itemUiState = ItemUiState(
             ItemDetails(
                 name = "Item name"

@@ -44,7 +44,7 @@ import de.gabriel.template.R
 import de.gabriel.template.data.Item
 import de.gabriel.template.ui.AppViewModelProvider
 import de.gabriel.template.ui.navigation.NavigationDestination
-import de.gabriel.template.ui.theme.TemplateTheme
+import de.gabriel.template.ui.theme.ListTemplateTheme
 
 object HomeDestination : NavigationDestination {
     override val route = "home"
@@ -173,7 +173,7 @@ private fun HomeItem(
 @Preview(showBackground = true)
 @Composable
 fun HomeBodyPreview() {
-    TemplateTheme {
+    ListTemplateTheme {
         HomeBody(listOf(
             Item(1, "Item 1"), Item(2, "Item 2"), Item(3, "Item 3")
         ), onItemClick = {})
@@ -183,7 +183,7 @@ fun HomeBodyPreview() {
 @Preview(showBackground = true)
 @Composable
 fun HomeBodyEmptyListPreview() {
-    TemplateTheme {
+    ListTemplateTheme {
         HomeBody(listOf(), onItemClick = {})
     }
 }
@@ -191,7 +191,7 @@ fun HomeBodyEmptyListPreview() {
 @Preview(showBackground = true)
 @Composable
 fun HomeItemPreview() {
-    TemplateTheme {
+    ListTemplateTheme {
         HomeItem(
             Item(1, "Item"),
         )

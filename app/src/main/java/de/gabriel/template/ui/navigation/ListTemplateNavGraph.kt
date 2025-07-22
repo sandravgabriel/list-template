@@ -17,7 +17,7 @@ import de.gabriel.template.ui.item.ItemEntryDestination
 import de.gabriel.template.ui.item.ItemEntryScreen
 
 @Composable
-fun TemplateNavHost(
+fun ListTemplateNavHost(
     navController: NavHostController,
     modifier: Modifier = Modifier,
 ) {

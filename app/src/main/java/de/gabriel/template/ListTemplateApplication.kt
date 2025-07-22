@@ -4,7 +4,7 @@ import android.app.Application
 import de.gabriel.template.data.AppContainer
 import de.gabriel.template.data.AppDataContainer
 
-class TemplateApplication : Application() {
+class ListTemplateApplication : Application() {
 
     /**
      * AppContainer instance used to obtain dependencies

@@ -6,7 +6,7 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import de.gabriel.template.TemplateApplication
+import de.gabriel.template.ListTemplateApplication
 import de.gabriel.template.ui.home.HomeViewModel
 import de.gabriel.template.ui.item.ItemDetailsViewModel
 import de.gabriel.template.ui.item.ItemEditViewModel
@@ -39,7 +39,7 @@ object AppViewModelProvider {
 
 /**
  * Extension function to queries for [Application] object and returns an instance of
- * [TemplateApplication].
+ * [ListTemplateApplication].
  */
-fun CreationExtras.templateApplication(): TemplateApplication =
-    (this[AndroidViewModelFactory.APPLICATION_KEY] as TemplateApplication)
+fun CreationExtras.templateApplication(): ListTemplateApplication =
+    (this[AndroidViewModelFactory.APPLICATION_KEY] as ListTemplateApplication)
