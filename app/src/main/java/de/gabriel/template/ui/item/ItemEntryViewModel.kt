@@ -6,8 +6,11 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import de.gabriel.template.data.Item
 import de.gabriel.template.data.ItemsRepository
+import java.io.File
 
-class ItemEntryViewModel(private val itemsRepository: ItemsRepository) : ViewModel() {
+class ItemEntryViewModel(
+    private val itemsRepository: ItemsRepository
+) : ViewModel() {
 
     var itemUiState by mutableStateOf(ItemUiState())
         private set
@@ -25,7 +28,7 @@ class ItemEntryViewModel(private val itemsRepository: ItemsRepository) : ViewMod
 
     suspend fun saveItem() {
         if (validateInput()) {
-            itemsRepository.insertItem(itemUiState.itemDetails.toItem())
+            itemsRepository.insertItem(itemUiState.itemDetails.toItem().toItemEntry())
         }
     }
 }
@@ -37,7 +40,8 @@ data class ItemUiState(
 
 data class ItemDetails(
     val id: Int = 0,
-    val name: String = ""
+    val name: String = "",
+    val image: File? = null,
 )
 
 /**
@@ -45,7 +49,8 @@ data class ItemDetails(
  */
 fun ItemDetails.toItem(): Item = Item(
     id = id,
-    name = name
+    name = name,
+    image = image
 )
 
 /**
@@ -61,5 +66,6 @@ fun Item.toItemUiState(isEntryValid: Boolean = false): ItemUiState = ItemUiState
  */
 fun Item.toItemDetails(): ItemDetails = ItemDetails(
     id = id,
-    name = name
+    name = name,
+    image = image
 )

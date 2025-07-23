@@ -42,6 +42,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import de.gabriel.template.TopAppBar
 import de.gabriel.template.R
 import de.gabriel.template.data.Item
+import de.gabriel.template.data.ItemEntry
 import de.gabriel.template.ui.AppViewModelProvider
 import de.gabriel.template.ui.navigation.NavigationDestination
 import de.gabriel.template.ui.theme.ListTemplateTheme
@@ -175,7 +176,7 @@ private fun HomeItem(
 fun HomeBodyPreview() {
     ListTemplateTheme {
         HomeBody(listOf(
-            Item(1, "Item 1"), Item(2, "Item 2"), Item(3, "Item 3")
+            Item.fromItemEntry(ItemEntry(1, "Item",""),null), Item.fromItemEntry(ItemEntry(2, "Item",""),null), Item.fromItemEntry(ItemEntry(3, "Item",""),null)
         ), onItemClick = {})
     }
 }
@@ -193,7 +194,7 @@ fun HomeBodyEmptyListPreview() {
 fun HomeItemPreview() {
     ListTemplateTheme {
         HomeItem(
-            Item(1, "Item"),
+            Item.fromItemEntry(ItemEntry(1, "Item",""),null)
         )
     }
 }

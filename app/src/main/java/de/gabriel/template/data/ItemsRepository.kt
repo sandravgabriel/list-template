@@ -1,16 +1,19 @@
 package de.gabriel.template.data
 
 import kotlinx.coroutines.flow.Flow
+import java.io.File
 
 interface ItemsRepository{
 
-    fun getItemStream(id: Int): Flow<Item?>
+    fun getItemStream(id: Int): Flow<ItemEntry?>
 
-    fun getAllItemsStream(): Flow<List<Item>>
+    suspend fun getItemWithFile(id: Int, file: File): Flow<Item?>
 
-    suspend fun insertItem(item: Item)
+    suspend fun getAllItemsStream(file: File): Flow<List<Item>>
 
-    suspend fun updateItem(item: Item)
+    suspend fun insertItem(item: ItemEntry)
 
-    suspend fun deleteItem(item: Item)
+    suspend fun updateItem(item: ItemEntry)
+
+    suspend fun deleteItem(item: ItemEntry)
 }

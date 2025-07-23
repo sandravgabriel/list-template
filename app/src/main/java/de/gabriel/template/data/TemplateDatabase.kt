@@ -8,7 +8,7 @@ import android.content.Context
 /**
  * Database class with a singleton Instance object.
  */
-@Database(entities = [Item::class], version = 1, exportSchema = false)
+@Database(entities = [ItemEntry::class], version = 1, exportSchema = false)
 abstract class TemplateDatabase : RoomDatabase() {
 
     abstract fun itemDao(): ItemDao

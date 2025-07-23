@@ -15,11 +15,12 @@ import de.gabriel.template.ui.item.ItemEntryViewModel
 object AppViewModelProvider {
     val Factory = viewModelFactory {
         initializer {
-            ItemEditViewModel(
-                this.createSavedStateHandle(),
-                templateApplication().container.itemsRepository
+            HomeViewModel(
+                templateApplication().container.itemsRepository,
+                templateApplication().photoSaver
             )
         }
+
         initializer {
             ItemEntryViewModel(templateApplication().container.itemsRepository)
         }
@@ -27,12 +28,17 @@ object AppViewModelProvider {
         initializer {
             ItemDetailsViewModel(
                 this.createSavedStateHandle(),
-                templateApplication().container.itemsRepository
+                templateApplication().container.itemsRepository,
+                templateApplication().photoSaver
             )
         }
 
         initializer {
-            HomeViewModel(templateApplication().container.itemsRepository)
+            ItemEditViewModel(
+                this.createSavedStateHandle(),
+                templateApplication().container.itemsRepository,
+                templateApplication().photoSaver
+            )
         }
     }
 }

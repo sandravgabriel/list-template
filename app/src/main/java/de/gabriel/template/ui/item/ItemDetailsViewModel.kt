@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import de.gabriel.template.data.ItemsRepository
+import de.gabriel.template.data.PhotoSaverRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -15,20 +16,15 @@ import kotlinx.coroutines.flow.stateIn
 class ItemDetailsViewModel(
     savedStateHandle: SavedStateHandle,
     private val itemsRepository: ItemsRepository,
+    private val photoSaver: PhotoSaverRepository
 ) : ViewModel() {
 
-    private val itemId: Int = checkNotNull(savedStateHandle[ItemDetailsDestination.itemIdArg])
-
-    /**
-     * Holds the item details ui state. The data is retrieved from [ItemsRepository] and mapped to
-     * the UI state.
-     */
     @OptIn(ExperimentalCoroutinesApi::class)
     val uiState: StateFlow<ItemDetailsUiState> =
-        savedStateHandle.getStateFlow(ItemDetailsDestination.itemIdArg, 0)
+        savedStateHandle.getStateFlow(ItemDetailsDestination.ITEM_ID_ARG, 0)
             .flatMapLatest { itemId ->
                 if (itemId > 0) { // Nur laden, wenn eine gültige ID vorhanden ist
-                    itemsRepository.getItemStream(itemId)
+                    itemsRepository.getItemWithFile(itemId, photoSaver.photoFolder)
                         .map { item ->
                             ItemDetailsUiState(itemDetails = item?.toItemDetails())
                         }
@@ -45,7 +41,7 @@ class ItemDetailsViewModel(
     suspend fun deleteItem() {
         val itemDetails = uiState.value.itemDetails
         if (itemDetails != null) {
-            itemsRepository.deleteItem(itemDetails.toItem())
+            itemsRepository.deleteItem(itemDetails.toItem().toItemEntry())
         }
     }
 

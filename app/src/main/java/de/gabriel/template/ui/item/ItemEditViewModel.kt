@@ -7,23 +7,25 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import de.gabriel.template.data.ItemsRepository
+import de.gabriel.template.data.PhotoSaverRepository
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 class ItemEditViewModel(
     savedStateHandle: SavedStateHandle,
-    private val itemsRepository: ItemsRepository
+    private val itemsRepository: ItemsRepository,
+    private val photoSaver: PhotoSaverRepository
 ) : ViewModel() {
 
     var itemUiState by mutableStateOf(ItemUiState())
         private set
 
-    private val itemId: Int = checkNotNull(savedStateHandle[ItemEditDestination.itemIdArg])
+    private val itemId: Int = checkNotNull(savedStateHandle[ItemEditDestination.ITEM_ID_ARG])
 
     init {
         viewModelScope.launch {
-            itemUiState = itemsRepository.getItemStream(itemId)
+            itemUiState = itemsRepository.getItemWithFile(itemId, photoSaver.photoFolder)
                 .filterNotNull()
                 .first()
                 .toItemUiState(true)
@@ -37,7 +39,7 @@ class ItemEditViewModel(
 
     suspend fun updateItem() {
         if (validateInput(itemUiState.itemDetails)) {
-            itemsRepository.updateItem(itemUiState.itemDetails.toItem())
+            itemsRepository.updateItem(itemUiState.itemDetails.toItem().toItemEntry())
         }
     }
 
