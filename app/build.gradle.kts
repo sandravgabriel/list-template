@@ -8,11 +8,11 @@ plugins {
 }
 
 android {
-    namespace = "de.gabriel.template"
+    namespace = "de.gabriel.listtemplate"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "de.gabriel.template"
+        applicationId = "de.gabriel.listtemplate"
         minSdk = 30
         targetSdk = 36
         versionCode = 1
