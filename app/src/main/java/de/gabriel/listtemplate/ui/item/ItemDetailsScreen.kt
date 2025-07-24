@@ -1,8 +1,11 @@
 package de.gabriel.listtemplate.ui.item
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -29,10 +32,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -121,8 +130,7 @@ private fun ItemDetailsBody(
             )
         } else {
             // TODO:
-            // Optional: Zeige einen Ladeindikator oder nichts,
-            // da die Navigation bald stattfinden sollte.
+            // Optional: Zeige einen Ladeindikator oder nichts, da die Navigation bald stattfinden sollte.
             // Text("Item wird geladen oder ist nicht verfügbar...")
         }
         OutlinedButton(
@@ -149,6 +157,13 @@ private fun ItemDetailsBody(
 fun ItemDetails(
     item: Item, modifier: Modifier = Modifier
 ) {
+    val userImageAvailable = item.image != null
+
+    val painter = if (userImageAvailable) {
+        painterResource(id = R.drawable.default_image) // TODO
+    } else {
+        painterResource(id = R.drawable.default_image)
+    }
     Card(
         modifier = modifier,
         colors = CardDefaults.cardColors(
@@ -159,6 +174,7 @@ fun ItemDetails(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                //.background(Color.Green)
                 .padding(dimensionResource(id = R.dimen.padding_medium)),
             verticalArrangement = Arrangement.spacedBy(
                 dimensionResource(id = R.dimen.padding_medium)
@@ -171,7 +187,43 @@ fun ItemDetails(
                         id = R.dimen
                             .padding_medium
                     )
+                ),
+            )
+            if (userImageAvailable) {
+                Image(
+                    painter = painter,
+                    contentDescription = "User selected image",
+                    modifier = Modifier
+                        .fillMaxWidth(fraction = 0.66f)
+                        .padding(horizontal = dimensionResource(id = R.dimen.padding_medium))
+                        .align(Alignment.CenterHorizontally)
                 )
+            } else {
+                Image(
+                    painter = painter,
+                    contentDescription = "default image",
+                    modifier = Modifier
+                        .fillMaxWidth(fraction = 0.4f)
+                        .aspectRatio(1f)
+                        //.background(Color.Magenta)
+                        .padding(
+                            horizontal = dimensionResource(
+                                id = R.dimen
+                                    .padding_medium
+                            )
+                        )
+                        .align(Alignment.CenterHorizontally),
+                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.secondary),
+                )
+            }
+            ItemDetailsRow(
+                itemDetail = "Image name: " + (item.image?.name ?: "no image"),
+                modifier = Modifier.padding(
+                    horizontal = dimensionResource(
+                        id = R.dimen
+                            .padding_medium
+                    )
+                ),
             )
         }
     }

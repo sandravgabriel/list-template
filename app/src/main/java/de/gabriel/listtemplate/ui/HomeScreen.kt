@@ -1,5 +1,6 @@
 package de.gabriel.listtemplate.ui
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -31,9 +32,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -150,6 +153,13 @@ private fun HomeList(
 private fun HomeItem(
     item: Item, modifier: Modifier = Modifier
 ) {
+    val userImageAvailable = item.image != null
+
+    val painter = if (userImageAvailable) {
+        painterResource(id = R.drawable.default_image) // TODO
+    } else {
+        painterResource(id = R.drawable.default_image)
+    }
     Card(
         modifier = modifier, elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
@@ -158,8 +168,24 @@ private fun HomeItem(
             verticalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.padding_small))
         ) {
             Row(
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.padding_small)),
+                verticalAlignment = Alignment.CenterVertically
             ) {
+                if (userImageAvailable) {
+                    Image(
+                        painter = painter,
+                        contentDescription = "User selected image",
+                        modifier = Modifier,
+                    )
+                } else {
+                    Image(
+                        painter = painter,
+                        contentDescription = "default image",
+                        modifier = Modifier,
+                        colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.secondary)
+                    )
+                }
                 Text(
                     text = item.name,
                     style = MaterialTheme.typography.titleLarge,

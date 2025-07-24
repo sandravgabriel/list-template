@@ -20,7 +20,7 @@ data class Item(
             return Item(
                 id = itemEntry.id,
                 name = itemEntry.name,
-                image = File(folderPath, itemEntry.imageName)
+                image = if (itemEntry.imageName.isNotEmpty()) File(folderPath, itemEntry.imageName) else null
             )
         }
     }
