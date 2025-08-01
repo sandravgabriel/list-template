@@ -1,7 +1,12 @@
 package de.gabriel.listtemplate.ui.item
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,19 +20,24 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
 import de.gabriel.listtemplate.TopAppBar
 import de.gabriel.listtemplate.R
 import de.gabriel.listtemplate.ui.AppViewModelProvider
 import de.gabriel.listtemplate.ui.navigation.NavigationDestination
-import de.gabriel.listtemplate.ui.theme.ListTemplateTheme
 import kotlinx.coroutines.launch
 
 object ItemEntryDestination : NavigationDestination {
@@ -44,6 +54,7 @@ fun ItemEntryScreen(
     viewModel: ItemEntryViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
     val coroutineScope = rememberCoroutineScope()
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -78,13 +89,23 @@ fun ItemEntryScreen(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ItemEntryBody(
     itemUiState: ItemUiState,
     onItemValueChange: (ItemDetails) -> Unit,
     onSaveClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    viewModel: ItemEntryViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
+    val coroutineScope = rememberCoroutineScope()
+    val imageUriToDisplay = itemUiState.localPickerPhoto
+
+    val pickImage = rememberLauncherForActivityResult(
+        ActivityResultContracts.PickVisualMedia(),
+        viewModel::onPhotoPickerSelect
+    )
+
     Column(
         modifier = modifier.padding(dimensionResource(id = R.dimen.padding_medium)),
         verticalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.padding_large))
@@ -94,6 +115,41 @@ fun ItemEntryBody(
             onValueChange = onItemValueChange,
             modifier = Modifier.fillMaxWidth()
         )
+        Text(text = stringResource(R.string.image))
+        if (imageUriToDisplay != null) {
+            AsyncImage(
+                model = imageUriToDisplay,
+                contentDescription = "selected image",
+                modifier = Modifier
+                    .padding(vertical = dimensionResource(id = R.dimen.padding_small)),
+                contentScale = ContentScale.Crop // Oder ContentScale.Fit, je nach Bedarf
+            )
+        }
+        else {
+            Image(
+                painter = painterResource(id = R.drawable.default_image),
+                contentDescription = "default image",
+                modifier = Modifier
+                    .fillMaxWidth(fraction = 0.4f)
+                    .aspectRatio(1f)
+                    .padding(
+                        horizontal = dimensionResource(
+                            id = R.dimen
+                                .padding_medium
+                        )
+                    )
+                    .align(Alignment.CenterHorizontally),
+                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.secondary),
+            )
+        }
+        TextButton(onClick = {
+            coroutineScope.launch {
+                pickImage.launch(PickVisualMediaRequest(
+                    ActivityResultContracts.PickVisualMedia.ImageOnly))
+            }
+        }) {
+            Text(stringResource(R.string.add_image))
+        }
         Button(
             onClick = onSaveClick,
             enabled = itemUiState.isEntryValid,
@@ -135,17 +191,5 @@ fun ItemInputForm(
                 modifier = Modifier.padding(start = dimensionResource(id = R.dimen.padding_medium))
             )
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun ItemEntryScreenPreview() {
-    ListTemplateTheme {
-        ItemEntryBody(itemUiState = ItemUiState(
-            ItemDetails(
-                name = "Item name"
-            )
-        ), onItemValueChange = {}, onSaveClick = {})
     }
 }

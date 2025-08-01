@@ -21,7 +21,10 @@ object AppViewModelProvider {
         }
 
         initializer {
-            ItemEntryViewModel(templateApplication().container.itemsRepository)
+            ItemEntryViewModel(
+                templateApplication().container.itemsRepository,
+                templateApplication().photoSaver,
+            )
         }
 
         initializer {

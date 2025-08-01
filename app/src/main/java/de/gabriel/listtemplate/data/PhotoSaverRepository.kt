@@ -3,27 +3,23 @@ package de.gabriel.listtemplate.data
 import android.content.ContentResolver
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
 
 class PhotoSaverRepository(context: Context, private val contentResolver: ContentResolver) {
 
-    private val _photos = mutableListOf<File>()
+    private var _photo: File? = null
 
-    fun getPhotos() = _photos.toList()
-    fun isEmpty() = _photos.isEmpty()
+    fun getPhoto() = _photo
 
     private val cacheFolder = File(context.cacheDir, "photos").also { it.mkdir() }
     val photoFolder = File(context.filesDir, "photos").also { it.mkdir() }
 
     private fun generateFileName() = "${System.currentTimeMillis()}.jpg"
-    private fun generatePhotoLogFile() = File(photoFolder, generateFileName())
+    private fun generatePhotoFile() = File(photoFolder, generateFileName())
     fun generatePhotoCacheFile() = File(cacheFolder, generateFileName())
-
-    fun cacheCapturedPhoto(photo: File) {
-        _photos += photo
-    }
 
     suspend fun cacheFromUri(uri: Uri) {
         withContext(Dispatchers.IO) {
@@ -33,33 +29,41 @@ class PhotoSaverRepository(context: Context, private val contentResolver: Conten
 
                 cachedPhoto.outputStream().use { output ->
                     input.copyTo(output)
-                    _photos += cachedPhoto
+                    _photo = cachedPhoto
                 }
             }
         }
     }
 
-    suspend fun cacheFromUris(uris: List<Uri>) {
-        uris.forEach {
-            cacheFromUri(it)
-        }
-    }
-
-    suspend fun removeFile(photo: File) {
+    suspend fun removeFile() {
         withContext(Dispatchers.IO) {
-            photo.delete()
-            _photos -= photo
+            _photo?.delete()
+            _photo = null
         }
     }
 
-    suspend fun savePhotos(): List<File> {
+    suspend fun savePhoto(): File? {
         return withContext(Dispatchers.IO) {
-            val savedPhotos = _photos.map { it.copyTo(generatePhotoLogFile()) }
+            val cachedFileToSave = _photo
+            if (cachedFileToSave == null || !cachedFileToSave.exists()) {
+                Log.w("PhotoSaver", "Keine gültige Cache-Datei zum Speichern vorhanden.") //TODO
+                _photo = null
+                return@withContext null
+            }
 
-            _photos.forEach { it.delete() }
-            _photos.clear()
-
-            savedPhotos
+            try {
+                val targetFile = File(photoFolder, "${System.currentTimeMillis()}.jpg") // photoFolder ist filesDir/photos
+                val savedPersistentFile = cachedFileToSave.copyTo(targetFile, overwrite = true)
+                Log.d("PhotoSaver", "Datei persistent gespeichert unter: ${savedPersistentFile.absolutePath}") //TODO
+                cachedFileToSave.delete()
+                _photo = null
+                return@withContext savedPersistentFile
+            } catch (e: Exception) {
+                Log.e("PhotoSaver", "Fehler beim Speichern der Datei von Cache nach Persistent", e) //TODO
+                // Optional: Versuchen, die (möglicherweise unvollständige) Zieldatei zu löschen, wenn ein Fehler auftritt
+                // targetFile.delete() // Benötigt, dass targetFile außerhalb des try deklariert ist oder hier neu erstellt wird.
+                return@withContext null
+            }
         }
     }
 }

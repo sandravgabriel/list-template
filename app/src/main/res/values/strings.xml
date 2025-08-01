@@ -10,6 +10,10 @@
     <string name="item_detail_title">Item Details</string>
     <string name="item_entry_title">Add Item</string>
     <string name="item_name_req">Item Name*</string>
+    <string name="image">Image</string>
+    <string name="image_name">Image Name: </string>
+    <string name="no_image">no Image</string>
+    <string name="add_image">Add Image</string>
     <string name="no">No</string>
     <string name="save_action">Save</string>
     <string name="yes">Yes</string>

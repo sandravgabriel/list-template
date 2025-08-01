@@ -1,5 +1,6 @@
 package de.gabriel.listtemplate.ui
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
@@ -34,6 +36,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
@@ -42,6 +46,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import de.gabriel.listtemplate.TopAppBar
 import de.gabriel.listtemplate.R
 import de.gabriel.listtemplate.data.Item
@@ -154,12 +160,8 @@ private fun HomeItem(
     item: Item, modifier: Modifier = Modifier
 ) {
     val userImageAvailable = item.image != null
+    val painter = painterResource(id = R.drawable.default_image)
 
-    val painter = if (userImageAvailable) {
-        painterResource(id = R.drawable.default_image) // TODO
-    } else {
-        painterResource(id = R.drawable.default_image)
-    }
     Card(
         modifier = modifier, elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
@@ -173,17 +175,29 @@ private fun HomeItem(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 if (userImageAvailable) {
-                    Image(
-                        painter = painter,
-                        contentDescription = "User selected image",
-                        modifier = Modifier,
+                    AsyncImage(
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data(item.image)
+                            .placeholder(R.drawable.default_image)
+                            //.error(R.drawable.ic_error_image) // TODO: Ein Fehler-Drawable
+                            .listener(onError = { request, result ->
+                                Log.e("Coil", "Fehler beim Laden von ${request.data}: ${result.throwable}") //TODO
+                            })
+                            .build(),
+                        contentDescription = "selected image",
+                        modifier = Modifier
+                            .padding(vertical = dimensionResource(id = R.dimen.padding_small))
+                            .height(48.dp),
                     )
                 } else {
                     Image(
                         painter = painter,
                         contentDescription = "default image",
-                        modifier = Modifier,
-                        colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.secondary)
+                        modifier = Modifier
+                            .padding(vertical = dimensionResource(id = R.dimen.padding_small))
+                            .height(48.dp),
+                        contentScale = ContentScale.FillHeight,
+                        colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.secondary),
                     )
                 }
                 Text(

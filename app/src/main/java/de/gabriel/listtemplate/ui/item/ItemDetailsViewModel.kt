@@ -23,7 +23,7 @@ class ItemDetailsViewModel(
     val uiState: StateFlow<ItemDetailsUiState> =
         savedStateHandle.getStateFlow(ItemDetailsDestination.ITEM_ID_ARG, 0)
             .flatMapLatest { itemId ->
-                if (itemId > 0) { // Nur laden, wenn eine gültige ID vorhanden ist
+                if (itemId > 0) {
                     itemsRepository.getItemWithFile(itemId, photoSaver.photoFolder)
                         .map { item ->
                             ItemDetailsUiState(itemDetails = item?.toItemDetails())
@@ -40,6 +40,7 @@ class ItemDetailsViewModel(
 
     suspend fun deleteItem() {
         val itemDetails = uiState.value.itemDetails
+        photoSaver.removeFile()
         if (itemDetails != null) {
             itemsRepository.deleteItem(itemDetails.toItem().toItemEntry())
         }
