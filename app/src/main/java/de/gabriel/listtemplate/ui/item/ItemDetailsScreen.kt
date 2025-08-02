@@ -206,9 +206,10 @@ fun ItemDetails(
                         })
                         .build(),
                     contentDescription = "selected image",
+                    contentScale = ContentScale.Crop,
                     modifier = Modifier
-                        .padding(vertical = dimensionResource(id = R.dimen.padding_small)),
-                    contentScale = ContentScale.Crop // Oder ContentScale.Fit, je nach Bedarf
+                        .padding(vertical = dimensionResource(id = R.dimen.padding_small))
+                        .aspectRatio(1f),
                 )
             } else {
                 Image(
@@ -227,15 +228,6 @@ fun ItemDetails(
                     colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.secondary),
                 )
             }
-            ItemDetailsRow(
-                itemDetail = stringResource(R.string.image_name) + (item.image?.name ?: stringResource(R.string.no_image)),
-                modifier = Modifier.padding(
-                    horizontal = dimensionResource(
-                        id = R.dimen
-                            .padding_medium
-                    )
-                ),
-            )
         }
     }
 }
