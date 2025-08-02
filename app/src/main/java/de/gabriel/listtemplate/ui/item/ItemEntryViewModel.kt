@@ -1,7 +1,6 @@
 package de.gabriel.listtemplate.ui.item
 
 import android.net.Uri
-import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -37,13 +36,6 @@ class ItemEntryViewModel(
         itemUiState = itemUiState.copy(itemDetails = itemDetails)
     }
 
-    fun onPhotoRemoved(photo: File) {
-        viewModelScope.launch {
-            photoSaver.removeFile()
-            refreshSavedPhoto(null)
-        }
-    }
-
     fun onPhotoPickerSelect(photo: Uri?) {
         if (photo != null) {
             viewModelScope.launch {
@@ -57,7 +49,6 @@ class ItemEntryViewModel(
         if (validateInput()) {
             val savedFile: File? = photoSaver.savePhoto()
             refreshSavedPhoto(savedFile)
-            //Log.d("Coil", "Nach refreshSavedPhoto: ${itemUiState.itemDetails.savedPhoto?.absolutePath}")
             itemsRepository.insertItem(itemUiState.itemDetails.toItem().toItemEntry())
         }
     }
@@ -89,7 +80,8 @@ fun ItemDetails.toItem(): Item = Item(
  */
 fun Item.toItemUiState(isEntryValid: Boolean = false): ItemUiState = ItemUiState(
     itemDetails = this.toItemDetails(),
-    isEntryValid = isEntryValid
+    isEntryValid = isEntryValid,
+    localPickerPhoto = Uri.fromFile(this.toItemDetails().savedPhoto)
 )
 
 /**

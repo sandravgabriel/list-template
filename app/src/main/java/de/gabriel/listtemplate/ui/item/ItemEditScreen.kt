@@ -54,6 +54,7 @@ fun ItemEditScreen(
                     navigateBack()
                 }
             },
+            onPhotoPickerSelect = viewModel::onPhotoPickerSelect,
             modifier = Modifier
                 .padding(
                     start = innerPadding.calculateStartPadding(LocalLayoutDirection.current),
