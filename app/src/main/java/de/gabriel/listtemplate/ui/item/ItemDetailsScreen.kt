@@ -71,6 +71,8 @@ fun ItemDetailsScreen(
 ) {
     val uiState = viewModel.uiState.collectAsState()
     val coroutineScope = rememberCoroutineScope()
+    var showDeleteFailedDialog by rememberSaveable { mutableStateOf(false) }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -95,10 +97,13 @@ fun ItemDetailsScreen(
         ItemDetailsBody(
             itemDetailsUiState = uiState.value,
             onDelete = {
-                    coroutineScope.launch {
-                        viewModel.deleteItem()
+                coroutineScope.launch {
+                    if (viewModel.deleteItem()) {
                         navigateBack()
+                    } else {
+                        showDeleteFailedDialog = true
                     }
+                }
             },
             modifier = Modifier
                 .padding(
@@ -107,6 +112,11 @@ fun ItemDetailsScreen(
                     top = innerPadding.calculateTopPadding()
                 )
                 .verticalScroll(rememberScrollState())
+        )
+    }
+    if (showDeleteFailedDialog) {
+        DeleteFailedDialog(
+            onDismiss = { showDeleteFailedDialog = false } // Wichtig: Eine Möglichkeit zum Schließen des Dialogs hinzufügen
         )
     }
 }
@@ -171,7 +181,6 @@ fun ItemDetails(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                //.background(Color.Green)
                 .padding(dimensionResource(id = R.dimen.padding_medium)),
             verticalArrangement = Arrangement.spacedBy(
                 dimensionResource(id = R.dimen.padding_medium)
@@ -208,7 +217,6 @@ fun ItemDetails(
                     modifier = Modifier
                         .fillMaxWidth(fraction = 0.4f)
                         .aspectRatio(1f)
-                        //.background(Color.Magenta)
                         .padding(
                             horizontal = dimensionResource(
                                 id = R.dimen
@@ -261,6 +269,24 @@ private fun DeleteConfirmationDialog(
                 Text(stringResource(R.string.yes))
             }
         })
+}
+
+@Composable
+private fun DeleteFailedDialog(
+    onDismiss: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.delete_failed_title)) },
+        text = { Text(stringResource(R.string.delete_failed_message)) },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.ok))
+            }
+        },
+        modifier = modifier
+    )
 }
 
 @Preview(showBackground = true)

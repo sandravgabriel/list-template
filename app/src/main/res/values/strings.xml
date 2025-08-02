@@ -4,6 +4,9 @@
     <string name="back_button">Back</string>
     <string name="delete">Delete</string>
     <string name="delete_question">Are you sure you want to delete?</string>
+    <string name="delete_failed_title">Deletion was not successful</string>
+    <string name="delete_failed_message">Unfortunately the deletion was unsuccessful</string>
+    <string name="ok">OK</string>
     <string name="no_item_description">\nNo items in the list.\nTap + to add.</string>
     <string name="edit_item_title">Edit Item</string>
     <string name="item">Item</string>

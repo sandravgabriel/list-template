@@ -7,18 +7,16 @@ import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.io.IOException
 
 class PhotoSaverRepository(context: Context, private val contentResolver: ContentResolver) {
 
     private var _photo: File? = null
 
-    fun getPhoto() = _photo
-
     private val cacheFolder = File(context.cacheDir, "photos").also { it.mkdir() }
     val photoFolder = File(context.filesDir, "photos").also { it.mkdir() }
 
     private fun generateFileName() = "${System.currentTimeMillis()}.jpg"
-    private fun generatePhotoFile() = File(photoFolder, generateFileName())
     fun generatePhotoCacheFile() = File(cacheFolder, generateFileName())
 
     suspend fun cacheFromUri(uri: Uri) {
@@ -35,10 +33,30 @@ class PhotoSaverRepository(context: Context, private val contentResolver: Conten
         }
     }
 
-    suspend fun removeFile() {
-        withContext(Dispatchers.IO) {
-            _photo?.delete()
-            _photo = null
+    suspend fun removeFile(): Boolean {
+        return withContext(Dispatchers.IO) {
+            try {
+                val photoFile = _photo
+                if (photoFile != null && photoFile.exists()) {
+                    val deleted = photoFile.delete()
+                    if (deleted) {
+                        _photo = null
+                    }
+                    deleted
+                } else {
+                    // File doesn't exist or _photo is null, consider this a success
+                    _photo = null // Still clear _photo if it was already null or non-existent
+                    true
+                }
+            } catch (e: IOException) {
+                //TODO
+                // Log the exception or handle it appropriately
+                false // Indicate failure
+            } catch (e: SecurityException) {
+                //TODO
+                // Handle potential security exceptions if file permissions are an issue
+                false
+            }
         }
     }
 

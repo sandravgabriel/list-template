@@ -38,12 +38,17 @@ class ItemDetailsViewModel(
                 initialValue = ItemDetailsUiState()
             )
 
-    suspend fun deleteItem() {
+    suspend fun deleteItem(): Boolean {
         val itemDetails = uiState.value.itemDetails
-        photoSaver.removeFile()
-        if (itemDetails != null) {
+        val deletionSuccessful = photoSaver.removeFile()
+        if (deletionSuccessful && itemDetails != null) {
             itemsRepository.deleteItem(itemDetails.toItem().toItemEntry())
+            return true
         }
+        else if (deletionSuccessful) {
+            return true
+        }
+        return false
     }
 
     companion object {
