@@ -3,13 +3,19 @@ package de.gabriel.listtemplate.ui.item
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -43,6 +49,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
@@ -67,57 +74,80 @@ fun ItemDetailsScreen(
     navigateToEditItem: (Int) -> Unit,
     navigateBack: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: ItemDetailsViewModel = viewModel(factory = AppViewModelProvider.Factory)
+    viewModel: ItemDetailsViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    provideScaffold: Boolean = true,
+    topAppBarTitle: String = stringResource(ItemDetailsDestination.titleRes)
 ) {
     val uiState = viewModel.uiState.collectAsState()
     val coroutineScope = rememberCoroutineScope()
     var showDeleteFailedDialog by rememberSaveable { mutableStateOf(false) }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = stringResource(ItemDetailsDestination.titleRes),
-                canNavigateBack = true,
-                navigateUp = navigateBack
+    val screenContent = @Composable { paddingValuesFromParentScaffold: PaddingValues ->
+        Box(modifier = modifier.fillMaxSize()) {
+            ItemDetailsBody(
+                itemDetailsUiState = uiState.value,
+                onDelete = {
+                    coroutineScope.launch {
+                        if (viewModel.deleteItem()) {
+                            navigateBack()
+                        } else {
+                            showDeleteFailedDialog = true
+                        }
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(
+                        start = paddingValuesFromParentScaffold.calculateStartPadding(
+                            LocalLayoutDirection.current
+                        ),
+                        end = paddingValuesFromParentScaffold.calculateEndPadding(
+                            LocalLayoutDirection.current
+                        ),
+                        top = paddingValuesFromParentScaffold.calculateTopPadding()
+                    )
+                    .verticalScroll(rememberScrollState())
             )
-        }, floatingActionButton = {
             FloatingActionButton(
                 onClick = { navigateToEditItem(uiState.value.itemDetails?.id ?: 0) },
                 shape = MaterialTheme.shapes.medium,
-                modifier = Modifier.padding(dimensionResource(id = R.dimen.padding_large))
-
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(dimensionResource(id = R.dimen.padding_large))
+                    .padding(
+                        end = WindowInsets.safeDrawing.asPaddingValues()
+                            .calculateEndPadding(LocalLayoutDirection.current),
+                        bottom = WindowInsets.safeDrawing.asPaddingValues()
+                            .calculateBottomPadding()
+                    )
             ) {
                 Icon(
                     imageVector = Icons.Default.Edit,
                     contentDescription = stringResource(R.string.edit_item_title),
                 )
             }
-        }, modifier = modifier
-    ) { innerPadding ->
-        ItemDetailsBody(
-            itemDetailsUiState = uiState.value,
-            onDelete = {
-                coroutineScope.launch {
-                    if (viewModel.deleteItem()) {
-                        navigateBack()
-                    } else {
-                        showDeleteFailedDialog = true
-                    }
-                }
-            },
-            modifier = Modifier
-                .padding(
-                    start = innerPadding.calculateStartPadding(LocalLayoutDirection.current),
-                    end = innerPadding.calculateEndPadding(LocalLayoutDirection.current),
-                    top = innerPadding.calculateTopPadding()
+            if (showDeleteFailedDialog) {
+                DeleteFailedDialog(
+                    onDismiss = { showDeleteFailedDialog = false }
                 )
-                .verticalScroll(rememberScrollState())
-        )
+            }
+        }
     }
-    if (showDeleteFailedDialog) {
-        DeleteFailedDialog(
-            onDismiss = { showDeleteFailedDialog = false } // Wichtig: Eine Möglichkeit zum Schließen des Dialogs hinzufügen
-        )
+
+    if (provideScaffold) {
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = topAppBarTitle,
+                    canNavigateBack = true,
+                    navigateUp = navigateBack
+                )
+            }
+        ) { innerPadding ->
+            screenContent(innerPadding)
+        }
+    } else {
+        screenContent(PaddingValues(0.dp))
     }
 }
 

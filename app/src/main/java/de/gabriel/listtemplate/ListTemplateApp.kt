@@ -12,6 +12,10 @@ import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -27,6 +31,7 @@ fun ListTemplateApp(navController: NavHostController = rememberNavController()) 
     val activity = context as Activity
     val windowSizeClass = calculateWindowSizeClass(activity)
     val currentScreenWidthClass = windowSizeClass.widthSizeClass
+    var selectedItemId by rememberSaveable { mutableStateOf<Int?>(null) }
 
     ListTemplateNavHost(navController = navController)
 }

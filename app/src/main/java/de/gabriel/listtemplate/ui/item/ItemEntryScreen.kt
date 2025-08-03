@@ -7,6 +7,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
@@ -32,6 +33,7 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import de.gabriel.listtemplate.TopAppBar
@@ -51,19 +53,13 @@ fun ItemEntryScreen(
     navigateBack: () -> Unit,
     onNavigateUp: () -> Unit,
     canNavigateBack: Boolean = true,
-    viewModel: ItemEntryViewModel = viewModel(factory = AppViewModelProvider.Factory)
+    viewModel: ItemEntryViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    provideScaffold: Boolean = true,
+    topAppBarTitle: String = stringResource(ItemEntryDestination.titleRes)
 ) {
     val coroutineScope = rememberCoroutineScope()
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = stringResource(ItemEntryDestination.titleRes),
-                canNavigateBack = canNavigateBack,
-                navigateUp = onNavigateUp
-            )
-        }
-    ) { innerPadding ->
+    val screenContent = @Composable { paddingValuesFromParentScaffold: PaddingValues ->
         ItemEntryBody(
             itemUiState = viewModel.itemUiState,
             onItemValueChange = viewModel::updateUiState,
@@ -80,13 +76,29 @@ fun ItemEntryScreen(
             onPhotoPickerSelect = viewModel::onPhotoPickerSelect,
             modifier = Modifier
                 .padding(
-                    start = innerPadding.calculateStartPadding(LocalLayoutDirection.current),
-                    top = innerPadding.calculateTopPadding(),
-                    end = innerPadding.calculateEndPadding(LocalLayoutDirection.current),
+                    start = paddingValuesFromParentScaffold.calculateStartPadding(LocalLayoutDirection.current),
+                    top = paddingValuesFromParentScaffold.calculateTopPadding(),
+                    end = paddingValuesFromParentScaffold.calculateEndPadding(LocalLayoutDirection.current),
                 )
                 .verticalScroll(rememberScrollState())
                 .fillMaxWidth()
         )
+    }
+
+    if (provideScaffold) {
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = topAppBarTitle,
+                    canNavigateBack = canNavigateBack,
+                    navigateUp = onNavigateUp
+                )
+            }
+        ) { innerPadding ->
+            screenContent(innerPadding)
+        }
+    } else {
+        screenContent(PaddingValues(0.dp))
     }
 }
 

@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -68,28 +69,40 @@ fun HomeScreen(
     navigateToItemEntry: () -> Unit,
     navigateToItemUpdate: (Int) -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: HomeViewModel = viewModel(factory = AppViewModelProvider.Factory)
+    viewModel: HomeViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    provideScaffold: Boolean = true,
+    topAppBarTitle: String = stringResource(HomeDestination.titleRes)
 ) {
     val homeUiState by viewModel.homeUiState.collectAsState()
+    // ScrollBehavior wird nur benötigt, wenn der Scaffold hier ist ODER
+    // wenn das übergeordnete Composable (z.B. ListDetailLayout) es benötigt und weitergibt.
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
-    Scaffold(
-        modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
-        topBar = {
-            TopAppBar(
-                title = stringResource(HomeDestination.titleRes),
-                canNavigateBack = false,
-                scrollBehavior = scrollBehavior
+    val screenContent = @Composable { paddingValuesFromParentScaffold: PaddingValues ->
+        // Der HomeBody ist der Hauptinhalt.
+        // Der FAB wird relativ zum HomeBody oder dem äußeren Container positioniert.
+        // Box wird verwendet, um den FAB über dem HomeBody zu platzieren.
+        Box(modifier = modifier.fillMaxSize()) { // modifier vom Parameter hier anwenden
+            HomeBody(
+                itemList = homeUiState.itemList,
+                onItemClick = navigateToItemUpdate,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValuesFromParentScaffold), // Padding vom (ggf. äußeren) Scaffold anwenden
             )
-        },
-        floatingActionButton = {
             FloatingActionButton(
                 onClick = navigateToItemEntry,
                 shape = MaterialTheme.shapes.medium,
                 modifier = Modifier
-                    .padding(
-                        end = WindowInsets.safeDrawing.asPaddingValues()
-                            .calculateEndPadding(LocalLayoutDirection.current)
+                    .align(Alignment.BottomEnd) // Typische Position für FAB
+                    .padding(16.dp) // Standard-Padding, anpassen nach Bedarf
+                    .padding( // Padding für WindowInsets, falls der FAB am Rand ist
+                        end = WindowInsets.safeDrawing
+                            .asPaddingValues()
+                            .calculateEndPadding(LocalLayoutDirection.current),
+                        bottom = WindowInsets.safeDrawing
+                            .asPaddingValues()
+                            .calculateBottomPadding()
                     )
             ) {
                 Icon(
@@ -97,14 +110,28 @@ fun HomeScreen(
                     contentDescription = stringResource(R.string.item_entry_title)
                 )
             }
-        },
-    ) { innerPadding ->
-        HomeBody(
-            itemList = homeUiState.itemList,
-            onItemClick = navigateToItemUpdate,
-            modifier = modifier.fillMaxSize(),
-            contentPadding = innerPadding,
-        )
+        }
+    }
+
+    if (provideScaffold) {
+        Scaffold(
+            modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+            topBar = {
+                TopAppBar(
+                    title = topAppBarTitle,
+                    canNavigateBack = false,
+                    scrollBehavior = scrollBehavior
+                )
+            },
+        ) { innerPadding ->
+            screenContent(innerPadding)
+        }
+    } else {
+        // Wenn kein Scaffold bereitgestellt wird, nur den Inhalt rendern.
+        // Das Padding muss vom übergeordneten Scaffold kommen (z.B. von ListDetailLayout).
+        // Ein Default-Padding kann hier übergeben werden, falls es direkt ohne äußeren Scaffold
+        // verwendet wird (unwahrscheinlich in deinem Dual-Pane-Szenario).
+        screenContent(PaddingValues(0.dp))
     }
 }
 
@@ -117,7 +144,7 @@ private fun HomeBody(
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = modifier,
+        modifier = modifier.padding(contentPadding)
     ) {
         if (itemList.isEmpty()) {
             Text(
