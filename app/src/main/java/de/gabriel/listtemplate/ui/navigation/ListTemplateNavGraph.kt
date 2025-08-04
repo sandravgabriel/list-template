@@ -20,6 +20,7 @@ import de.gabriel.listtemplate.ui.item.ItemEntryScreen
 fun ListTemplateNavHost(
     navController: NavHostController,
     modifier: Modifier = Modifier,
+    onItemSelectedInListScreen: (Int) -> Unit,
 ) {
     NavHost(
         navController = navController,
@@ -29,9 +30,10 @@ fun ListTemplateNavHost(
         composable(route = HomeDestination.route) {
             HomeScreen(
                 navigateToItemEntry = { navController.navigate(ItemEntryDestination.route) },
-                navigateToItemUpdate = {
-                    navController.navigate("${ItemDetailsDestination.route}/${it}")
-                }
+                onItemClick = { itemId ->
+                    onItemSelectedInListScreen(itemId)
+                    navController.navigate("${ItemDetailsDestination.route}/${itemId}")
+                },
             )
         }
         composable(route = ItemEntryDestination.route) {

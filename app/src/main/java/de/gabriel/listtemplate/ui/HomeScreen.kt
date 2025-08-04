@@ -67,36 +67,31 @@ object HomeDestination : NavigationDestination {
 @Composable
 fun HomeScreen(
     navigateToItemEntry: () -> Unit,
-    navigateToItemUpdate: (Int) -> Unit,
+    onItemClick: (Int) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = viewModel(factory = AppViewModelProvider.Factory),
     provideScaffold: Boolean = true,
     topAppBarTitle: String = stringResource(HomeDestination.titleRes)
 ) {
     val homeUiState by viewModel.homeUiState.collectAsState()
-    // ScrollBehavior wird nur benötigt, wenn der Scaffold hier ist ODER
-    // wenn das übergeordnete Composable (z.B. ListDetailLayout) es benötigt und weitergibt.
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
     val screenContent = @Composable { paddingValuesFromParentScaffold: PaddingValues ->
-        // Der HomeBody ist der Hauptinhalt.
-        // Der FAB wird relativ zum HomeBody oder dem äußeren Container positioniert.
-        // Box wird verwendet, um den FAB über dem HomeBody zu platzieren.
-        Box(modifier = modifier.fillMaxSize()) { // modifier vom Parameter hier anwenden
+        Box(modifier = modifier.fillMaxSize()) {
             HomeBody(
                 itemList = homeUiState.itemList,
-                onItemClick = navigateToItemUpdate,
+                onItemClick = onItemClick,
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(paddingValuesFromParentScaffold), // Padding vom (ggf. äußeren) Scaffold anwenden
+                    .padding(paddingValuesFromParentScaffold),
             )
             FloatingActionButton(
                 onClick = navigateToItemEntry,
                 shape = MaterialTheme.shapes.medium,
                 modifier = Modifier
-                    .align(Alignment.BottomEnd) // Typische Position für FAB
-                    .padding(16.dp) // Standard-Padding, anpassen nach Bedarf
-                    .padding( // Padding für WindowInsets, falls der FAB am Rand ist
+                    .align(Alignment.BottomEnd)
+                    .padding(16.dp)
+                    .padding(
                         end = WindowInsets.safeDrawing
                             .asPaddingValues()
                             .calculateEndPadding(LocalLayoutDirection.current),
@@ -127,10 +122,6 @@ fun HomeScreen(
             screenContent(innerPadding)
         }
     } else {
-        // Wenn kein Scaffold bereitgestellt wird, nur den Inhalt rendern.
-        // Das Padding muss vom übergeordneten Scaffold kommen (z.B. von ListDetailLayout).
-        // Ein Default-Padding kann hier übergeben werden, falls es direkt ohne äußeren Scaffold
-        // verwendet wird (unwahrscheinlich in deinem Dual-Pane-Szenario).
         screenContent(PaddingValues(0.dp))
     }
 }
