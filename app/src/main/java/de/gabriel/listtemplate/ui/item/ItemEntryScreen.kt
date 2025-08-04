@@ -36,7 +36,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
-import de.gabriel.listtemplate.TopAppBar
+import de.gabriel.listtemplate.ui.common.TopAppBar
 import de.gabriel.listtemplate.R
 import de.gabriel.listtemplate.ui.AppViewModelProvider
 import de.gabriel.listtemplate.ui.navigation.NavigationDestination

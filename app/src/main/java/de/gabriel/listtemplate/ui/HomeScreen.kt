@@ -51,7 +51,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import de.gabriel.listtemplate.TopAppBar
+import de.gabriel.listtemplate.ui.common.TopAppBar
 import de.gabriel.listtemplate.R
 import de.gabriel.listtemplate.data.Item
 import de.gabriel.listtemplate.data.ItemEntry

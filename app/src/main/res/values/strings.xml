@@ -21,4 +21,6 @@
     <string name="save_action">Save</string>
     <string name="yes">Yes</string>
     <string name="required_fields">*required fields</string>
+    <string name="screen_title_detail">List Template</string>
+    <string name="placeholder_no_item_selected">No Item selected</string>
 </resources>

@@ -81,7 +81,7 @@ fun ItemDetails.toItem(): Item = Item(
 fun Item.toItemUiState(isEntryValid: Boolean = false): ItemUiState = ItemUiState(
     itemDetails = this.toItemDetails(),
     isEntryValid = isEntryValid,
-    localPickerPhoto = Uri.fromFile(this.toItemDetails().savedPhoto)
+    localPickerPhoto = this.toItemDetails().savedPhoto?.let { Uri.fromFile(it) }
 )
 
 /**

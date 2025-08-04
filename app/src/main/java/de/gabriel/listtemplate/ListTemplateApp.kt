@@ -1,27 +1,18 @@
 package de.gabriel.listtemplate
 
 import android.app.Activity
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import de.gabriel.listtemplate.R.string
+import de.gabriel.listtemplate.ui.adaptive.ListTemplateAppContent
 import de.gabriel.listtemplate.ui.navigation.ListTemplateNavHost
 
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
@@ -33,30 +24,30 @@ fun ListTemplateApp(navController: NavHostController = rememberNavController()) 
     val currentScreenWidthClass = windowSizeClass.widthSizeClass
     var selectedItemId by rememberSaveable { mutableStateOf<Int?>(null) }
 
-    ListTemplateNavHost(navController = navController)
-}
+    //vorher: ListTemplateNavHost(navController = navController)
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun TopAppBar(
-    title: String,
-    canNavigateBack: Boolean,
-    modifier: Modifier = Modifier,
-    scrollBehavior: TopAppBarScrollBehavior? = null,
-    navigateUp: () -> Unit = {}
-) {
-    CenterAlignedTopAppBar(
-        title = { Text(title) },
-        modifier = modifier,
-        scrollBehavior = scrollBehavior,
-        navigationIcon = {
-            if (canNavigateBack) {
-                IconButton(onClick = navigateUp) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = stringResource(string.back_button)
-                    )
-                }
+    ListTemplateAppContent(
+        navController = navController,
+        currentScreenWidthClass = currentScreenWidthClass,
+        selectedItemId = selectedItemId,
+        onItemSelected = { itemId ->
+            // Logik für Item-Auswahl kommt in späteren Commits
+            selectedItemId = if (currentScreenWidthClass == WindowWidthSizeClass.Expanded) {
+                itemId // Im Expanded-Modus nur den Zustand aktualisieren
+            } else {
+                // Im Compact/Medium-Modus zum Detail-Screen navigieren
+                // Diese Navigation wird später verfeinert
+                navController.navigate("item_details/$itemId") // Beispielroute
+                itemId
+            }
+        },
+        onBackFromDetail = {
+            // Logik für Zurück vom Detail kommt später
+            if (currentScreenWidthClass == WindowWidthSizeClass.Expanded) {
+                selectedItemId = null // Im Expanded-Modus den Detailbereich leeren
+            } else {
+                navController.popBackStack()
+                selectedItemId = null
             }
         }
     )
