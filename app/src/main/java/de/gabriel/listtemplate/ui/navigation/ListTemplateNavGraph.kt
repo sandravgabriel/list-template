@@ -47,9 +47,16 @@ fun ListTemplateNavHost(
             arguments = listOf(navArgument(ItemDetailsDestination.ITEM_ID_ARG) {
                 type = NavType.IntType
             })
-        ) {
+        ) { backStackEntry -> // Zugriff auf backStackEntry, um Argumente zu lesen
+            // Hier greifen wir auf die itemId aus den Navigationsargumenten zu.
+            // Das ViewModel im ItemDetailsScreen wird dies typischerweise auch tun.
+            val itemId = backStackEntry.arguments?.getInt(ItemDetailsDestination.ITEM_ID_ARG)
             ItemDetailsScreen(
-                navigateToEditItem = { navController.navigate("${ItemEditDestination.route}/$it") },
+                // navigateToEditItem: Im Compact-Modus soll direkt zum ItemEditScreen navigiert werden.
+                // Die itemId wird dem ItemEditScreen als Navigationsargument übergeben.
+                navigateToEditItem = { currentItemId -> // currentItemId ist hier die ID des angezeigten Items
+                    navController.navigate("${ItemEditDestination.route}/$currentItemId")
+                },
                 navigateBack = { navController.popBackStack() }
             )
         }
@@ -59,6 +66,7 @@ fun ListTemplateNavHost(
                 type = NavType.IntType
             })
         ) {
+            // Das ViewModel im ItemEditScreen wird die itemId aus den NavArgs beziehen.
             ItemEditScreen(
                 navigateBack = { navController.popBackStack() },
                 onNavigateUp = { navController.navigateUp() }

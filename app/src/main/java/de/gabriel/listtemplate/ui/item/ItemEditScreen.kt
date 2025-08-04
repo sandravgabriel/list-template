@@ -9,6 +9,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -34,10 +35,19 @@ fun ItemEditScreen(
     navigateBack: () -> Unit,
     onNavigateUp: () -> Unit,
     modifier: Modifier = Modifier,
+    selectedItemId: Int? = null,
     viewModel: ItemEditViewModel = viewModel(factory = AppViewModelProvider.Factory),
     provideScaffold: Boolean = true,
     topAppBarTitle: String = stringResource(ItemEditDestination.titleRes)
 ) {
+    // Wenn eine ID direkt übergeben wird (Expanded-Modus), initialisiere das ViewModel damit.
+    // Dies sollte nur einmal passieren oder wenn sich die ID ändert.
+    LaunchedEffect(selectedItemId) {
+        if (selectedItemId != null) {
+            viewModel.initializeWithItemId(selectedItemId)
+        }
+    }
+
     val coroutineScope = rememberCoroutineScope()
 
     val screenContent = @Composable { paddingValuesFromParentScaffold: PaddingValues ->
@@ -53,7 +63,9 @@ fun ItemEditScreen(
             onPhotoPickerSelect = viewModel::onPhotoPickerSelect,
             modifier = Modifier
                 .padding(
-                    start = paddingValuesFromParentScaffold.calculateStartPadding(LocalLayoutDirection.current),
+                    start = paddingValuesFromParentScaffold.calculateStartPadding(
+                        LocalLayoutDirection.current
+                    ),
                     end = paddingValuesFromParentScaffold.calculateEndPadding(LocalLayoutDirection.current),
                     top = paddingValuesFromParentScaffold.calculateTopPadding()
                 )

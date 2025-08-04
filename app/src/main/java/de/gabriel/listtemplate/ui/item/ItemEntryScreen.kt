@@ -52,7 +52,7 @@ object ItemEntryDestination : NavigationDestination {
 fun ItemEntryScreen(
     navigateBack: () -> Unit,
     onNavigateUp: () -> Unit,
-    canNavigateBack: Boolean = true,
+    modifier: Modifier = Modifier,
     viewModel: ItemEntryViewModel = viewModel(factory = AppViewModelProvider.Factory),
     provideScaffold: Boolean = true,
     topAppBarTitle: String = stringResource(ItemEntryDestination.titleRes)
@@ -74,7 +74,7 @@ fun ItemEntryScreen(
                 }
             },
             onPhotoPickerSelect = viewModel::onPhotoPickerSelect,
-            modifier = Modifier
+            modifier = modifier
                 .padding(
                     start = paddingValuesFromParentScaffold.calculateStartPadding(LocalLayoutDirection.current),
                     top = paddingValuesFromParentScaffold.calculateTopPadding(),
@@ -90,7 +90,7 @@ fun ItemEntryScreen(
             topBar = {
                 TopAppBar(
                     title = topAppBarTitle,
-                    canNavigateBack = canNavigateBack,
+                    canNavigateBack = true,
                     navigateUp = onNavigateUp
                 )
             }

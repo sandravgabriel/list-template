@@ -12,63 +12,54 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import de.gabriel.listtemplate.DetailScreenMode
+import de.gabriel.listtemplate.ENTRY_ITEM_ID
 import de.gabriel.listtemplate.R
 import de.gabriel.listtemplate.ui.common.TopAppBar
+import de.gabriel.listtemplate.ui.item.ItemDetailsDestination
+import de.gabriel.listtemplate.ui.item.ItemEditDestination
+import de.gabriel.listtemplate.ui.item.ItemEntryDestination
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ListDetailLayout(
     selectedItemId: Int?,
-    onItemSelected: (itemId: Int) -> Unit, // Wird von listPaneContent aufgerufen
-    onBack: () -> Unit, // Für Back-Handling im Detailbereich oder global
+    detailScreenMode: DetailScreenMode,
+    onItemSelected: (itemId: Int) -> Unit,
+    onBack: () -> Unit,
     listPaneContent: @Composable (paddingValues: PaddingValues) -> Unit,
-    detailPaneContent: @Composable (itemId: Int, paddingValues: PaddingValues) -> Unit,
+    detailPaneContent: @Composable (itemId: Int?, currentDetailMode: DetailScreenMode, paddingValues: PaddingValues) -> Unit,
     modifier: Modifier = Modifier
 ) {
     // Dieser Scaffold wird der Haupt-Scaffold im Dual-Pane-Modus sein.
     Scaffold(
         modifier = modifier,
         topBar = {
-            // Eine globale TopAppBar für das Dual-Pane-Layout.
-            // Der Titel und die Aktionen können dynamisch sein.
+            val titleRes = when {
+                selectedItemId == ENTRY_ITEM_ID -> ItemEntryDestination.titleRes
+                detailScreenMode == DetailScreenMode.EDIT && selectedItemId != null -> ItemEditDestination.titleRes
+                selectedItemId != null -> ItemDetailsDestination.titleRes
+                else -> R.string.app_name
+            }
             TopAppBar(
-                title = if (selectedItemId != null) stringResource(R.string.screen_title_detail) else stringResource(R.string.app_name),
-                canNavigateBack = selectedItemId != null, // Zeige "Zurück", um Detail zu schließen
-                navigateUp = onBack // onBack sollte selectedItemId auf null setzen
+                title = stringResource(titleRes),
+                canNavigateBack = selectedItemId != null, // "Zurück" wenn Detail/Entry/Edit aktiv
+                navigateUp = onBack
             )
         }
-    ) { innerPadding -> // Dieses innerPadding ist vom Scaffold des ListDetailLayout
+    ) { innerPadding ->
         Row(Modifier.fillMaxSize()) {
             Box(
                 modifier = Modifier
-                    .weight(0.4f) // Beispielgewichtung, anpassbar
-                // .padding(innerPadding) // Das Padding wird an listPaneContent übergeben
+                    .weight(0.4f)
             ) {
-                // listPaneContent erhält das Padding vom äußeren Scaffold
                 listPaneContent(innerPadding)
             }
             Box(
-                modifier = Modifier
-                    .weight(0.6f) // Beispielgewichtung
+                modifier = Modifier.weight(0.6f)
             ) {
-                if (selectedItemId != null) {
-                    detailPaneContent(selectedItemId, innerPadding)
-                } else {
-                    // Platzhalter, wenn kein Item ausgewählt ist
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(innerPadding),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(stringResource(R.string.placeholder_no_item_selected))
-                    }
-                }
+                detailPaneContent(selectedItemId, detailScreenMode, innerPadding)
             }
         }
-        // Hier könnte später der BackHandler für den Detailbereich hinkommen
-        // if (selectedItemId != null) {
-        //     BackHandler { onBack() }
-        // }
     }
 }

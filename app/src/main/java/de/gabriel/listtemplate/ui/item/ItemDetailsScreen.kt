@@ -74,6 +74,7 @@ fun ItemDetailsScreen(
     navigateToEditItem: (Int) -> Unit,
     navigateBack: () -> Unit,
     modifier: Modifier = Modifier,
+    selectedItemIdFromParent: Int? = null,
     viewModel: ItemDetailsViewModel = viewModel(factory = AppViewModelProvider.Factory),
     provideScaffold: Boolean = true,
     topAppBarTitle: String = stringResource(ItemDetailsDestination.titleRes)
@@ -109,7 +110,7 @@ fun ItemDetailsScreen(
                     .verticalScroll(rememberScrollState())
             )
             FloatingActionButton(
-                onClick = { navigateToEditItem(uiState.value.itemDetails?.id ?: 0) },
+                onClick = { navigateToEditItem(selectedItemIdFromParent ?: 0) },
                 shape = MaterialTheme.shapes.medium,
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
