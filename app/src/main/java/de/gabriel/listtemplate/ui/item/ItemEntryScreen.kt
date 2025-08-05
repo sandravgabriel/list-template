@@ -34,6 +34,7 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import de.gabriel.listtemplate.ui.common.TopAppBar
@@ -112,7 +113,10 @@ fun ItemEntryBody(
     modifier: Modifier = Modifier
 ) {
     val coroutineScope = rememberCoroutineScope()
-    val imageUriToDisplay = itemUiState.localPickerPhoto
+    val imageUriToDisplay: Uri? = // Ein neues Bild wurde im Photo Picker ausgewählt
+        itemUiState.localPickerPhoto
+            ?: // Kein neues Bild ausgewählt, versuche das gespeicherte Bild anzuzeigen
+            itemUiState.itemDetails.savedPhoto?.toUri()
 
     val pickImage = rememberLauncherForActivityResult(
         ActivityResultContracts.PickVisualMedia(),
@@ -135,7 +139,7 @@ fun ItemEntryBody(
                 contentDescription = "selected image",
                 modifier = Modifier
                     .padding(vertical = dimensionResource(id = R.dimen.padding_small)),
-                contentScale = ContentScale.Crop // Oder ContentScale.Fit, je nach Bedarf
+                contentScale = ContentScale.Crop
             )
         }
         else {

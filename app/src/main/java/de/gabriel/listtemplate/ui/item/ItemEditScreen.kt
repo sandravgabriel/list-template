@@ -43,7 +43,7 @@ fun ItemEditScreen(
     // Wenn eine ID direkt übergeben wird (Expanded-Modus), initialisiere das ViewModel damit.
     // Dies sollte nur einmal passieren oder wenn sich die ID ändert.
     LaunchedEffect(selectedItemId) {
-        if (selectedItemId != null) {
+        if (selectedItemId != null && selectedItemId != -1) {
             viewModel.initializeWithItemId(selectedItemId)
         }
     }

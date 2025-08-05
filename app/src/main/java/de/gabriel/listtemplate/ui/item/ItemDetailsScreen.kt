@@ -1,5 +1,6 @@
 package de.gabriel.listtemplate.ui.item
 
+import android.app.Activity
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -31,6 +32,9 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
+import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -68,7 +72,7 @@ object ItemDetailsDestination : NavigationDestination {
     val routeWithArgs = "$route/{$ITEM_ID_ARG}"
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3WindowSizeClassApi::class)
 @Composable
 fun ItemDetailsScreen(
     navigateToEditItem: (Int) -> Unit,
@@ -79,14 +83,18 @@ fun ItemDetailsScreen(
     provideScaffold: Boolean = true,
     topAppBarTitle: String = stringResource(ItemDetailsDestination.titleRes)
 ) {
-    val uiState = viewModel.uiState.collectAsState()
+    val context = LocalContext.current
+    val activity = context as Activity
+    val windowSizeClass = calculateWindowSizeClass(activity)
+    val currentScreenWidthClass = windowSizeClass.widthSizeClass
+    val uiState by viewModel.uiState.collectAsState()
     val coroutineScope = rememberCoroutineScope()
     var showDeleteFailedDialog by rememberSaveable { mutableStateOf(false) }
 
     val screenContent = @Composable { paddingValuesFromParentScaffold: PaddingValues ->
         Box(modifier = modifier.fillMaxSize()) {
             ItemDetailsBody(
-                itemDetailsUiState = uiState.value,
+                itemDetailsUiState = uiState,
                 onDelete = {
                     coroutineScope.launch {
                         if (viewModel.deleteItem()) {
@@ -110,7 +118,23 @@ fun ItemDetailsScreen(
                     .verticalScroll(rememberScrollState())
             )
             FloatingActionButton(
-                onClick = { navigateToEditItem(selectedItemIdFromParent ?: 0) },
+                onClick = {
+                    val idForEdit: Int = if (currentScreenWidthClass == WindowWidthSizeClass.Expanded) { // Unterscheide Compact/Expanded
+                        // Im Expanded-Modus, verwende selectedItemIdFromParent, aber mit Vorsicht
+                        selectedItemIdFromParent ?: 0 // oder eine bessere Fehlerbehandlung
+                    } else {
+                        // Im Compact-Modus, verwende die ID aus dem itemDetails des ViewModels
+                        uiState.itemDetails?.id ?: 0 // Wenn itemDetails null ist, oder id 0 ist, haben wir ein Problem
+                    }
+
+                    if (idForEdit > 0) { // Nur navigieren, wenn die ID gültig ist
+                        navigateToEditItem(idForEdit)
+                    } else {
+                        // Logge einen Fehler oder zeige eine Meldung, dass die ID ungültig ist
+                        Log.e("ItemDetailsScreen", "Attempted to navigate to edit with invalid ID: $idForEdit")
+                        // Man könnte hier auch eine Toast-Nachricht anzeigen
+                    }
+                },
                 shape = MaterialTheme.shapes.medium,
                 modifier = Modifier
                     .align(Alignment.BottomEnd)

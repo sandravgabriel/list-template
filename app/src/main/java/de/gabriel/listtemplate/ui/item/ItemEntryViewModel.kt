@@ -20,9 +20,11 @@ class ItemEntryViewModel(
     var itemUiState by mutableStateOf(ItemUiState())
         private set
 
-    fun updateUiState(itemDetails: ItemDetails) {
-        itemUiState =
-            ItemUiState(itemDetails = itemDetails, isEntryValid = validateInput(itemDetails))
+    fun updateUiState(newItemDetails: ItemDetails) {
+        itemUiState = itemUiState.copy(
+            itemDetails = newItemDetails,
+            isEntryValid = validateInput(newItemDetails)
+        )
     }
 
     private fun validateInput(uiState: ItemDetails = itemUiState.itemDetails): Boolean {
@@ -42,6 +44,9 @@ class ItemEntryViewModel(
                 photoSaver.cacheFromUri(photo)
                 itemUiState = itemUiState.copy(localPickerPhoto = photo)
             }
+        } else {
+            // Was passiert, wenn die Auswahl abgebrochen wird oder kein Foto gewählt wird?
+            itemUiState = itemUiState.copy(localPickerPhoto = null)
         }
     }
 
