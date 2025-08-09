@@ -1,38 +1,45 @@
 package de.gabriel.listtemplate.ui.item
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import de.gabriel.listtemplate.data.ItemsRepository
 import de.gabriel.listtemplate.data.PhotoSaverRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import java.io.File
 
 class ItemDetailsViewModel(
-    savedStateHandle: SavedStateHandle,
     private val itemsRepository: ItemsRepository,
     private val photoSaver: PhotoSaverRepository
 ) : ViewModel() {
 
+    private val _currentDisplayItemId = MutableStateFlow<Int?>(null) // Interne StateFlow für die ID
+
+    // Diese Methode wird vom ItemDetailsScreen (via LaunchedEffect) aufgerufen,
+    // wenn sich selectedItemIdFromParent ändert.
+    fun loadItemDetailsForId(itemId: Int?) {
+        _currentDisplayItemId.value = itemId
+    }
+
+    fun clearItemDetails() {
+        _currentDisplayItemId.value = null
+    }
+
     @OptIn(ExperimentalCoroutinesApi::class)
     val uiState: StateFlow<ItemDetailsUiState> =
-        savedStateHandle.getStateFlow(ItemDetailsDestination.ITEM_ID_ARG, 0)
-            .flatMapLatest { itemId ->
-                if (itemId > 0) {
-                    itemsRepository.getItemWithFile(itemId, photoSaver.photoFolder)
-                        .map { item ->
-                            ItemDetailsUiState(itemDetails = item?.toItemDetails())
-                        }
-                } else {
-                    flowOf(ItemDetailsUiState()) // Leerer Zustand für ungültige ID
-                }
+        _currentDisplayItemId.flatMapLatest { itemId ->
+            if (itemId != null && itemId > 0) {
+                itemsRepository.getItemWithFile(itemId, photoSaver.photoFolder)
+                    .map { item -> ItemDetailsUiState(itemDetails = item?.toItemDetails()) }
+            } else {
+                flowOf(ItemDetailsUiState())
             }
+        }
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),

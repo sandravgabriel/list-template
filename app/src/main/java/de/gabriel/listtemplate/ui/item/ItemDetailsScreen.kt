@@ -37,6 +37,7 @@ import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
@@ -78,6 +79,7 @@ fun ItemDetailsScreen(
     navigateToEditItem: (Int) -> Unit,
     navigateBack: () -> Unit,
     modifier: Modifier = Modifier,
+    itemIdFromNavArgs: Int?,
     selectedItemIdFromParent: Int? = null,
     viewModel: ItemDetailsViewModel = viewModel(factory = AppViewModelProvider.Factory),
     provideScaffold: Boolean = true,
@@ -90,6 +92,21 @@ fun ItemDetailsScreen(
     val uiState by viewModel.uiState.collectAsState()
     val coroutineScope = rememberCoroutineScope()
     var showDeleteFailedDialog by rememberSaveable { mutableStateOf(false) }
+
+    // Dieser LaunchedEffect reagiert, wenn selectedItemIdFromParent sich ändert
+    LaunchedEffect(key1 = itemIdFromNavArgs, key2 = selectedItemIdFromParent, key3 = currentScreenWidthClass) {
+        val itemIdToLoad = if (currentScreenWidthClass == WindowWidthSizeClass.Expanded) {
+            selectedItemIdFromParent
+        } else {
+            itemIdFromNavArgs
+        }
+
+        if (itemIdToLoad != null && itemIdToLoad > 0) {
+            viewModel.loadItemDetailsForId(itemIdToLoad)
+        } else {
+            viewModel.clearItemDetails()
+        }
+    }
 
     val screenContent = @Composable { paddingValuesFromParentScaffold: PaddingValues ->
         Box(modifier = modifier.fillMaxSize()) {
@@ -119,12 +136,12 @@ fun ItemDetailsScreen(
             )
             FloatingActionButton(
                 onClick = {
-                    val idForEdit: Int = if (currentScreenWidthClass == WindowWidthSizeClass.Expanded) { // Unterscheide Compact/Expanded
+                    val idForEdit: Int = if (currentScreenWidthClass == WindowWidthSizeClass.Expanded) {
                         // Im Expanded-Modus, verwende selectedItemIdFromParent, aber mit Vorsicht
                         selectedItemIdFromParent ?: 0 // oder eine bessere Fehlerbehandlung
                     } else {
                         // Im Compact-Modus, verwende die ID aus dem itemDetails des ViewModels
-                        uiState.itemDetails?.id ?: 0 // Wenn itemDetails null ist, oder id 0 ist, haben wir ein Problem
+                        uiState.itemDetails?.id ?: 0
                     }
 
                     if (idForEdit > 0) { // Nur navigieren, wenn die ID gültig ist
@@ -132,7 +149,6 @@ fun ItemDetailsScreen(
                     } else {
                         // Logge einen Fehler oder zeige eine Meldung, dass die ID ungültig ist
                         Log.e("ItemDetailsScreen", "Attempted to navigate to edit with invalid ID: $idForEdit")
-                        // Man könnte hier auch eine Toast-Nachricht anzeigen
                     }
                 },
                 shape = MaterialTheme.shapes.medium,

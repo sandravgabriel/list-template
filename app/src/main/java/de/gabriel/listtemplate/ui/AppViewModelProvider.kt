@@ -29,7 +29,6 @@ object AppViewModelProvider {
 
         initializer {
             ItemDetailsViewModel(
-                this.createSavedStateHandle(),
                 templateApplication().container.itemsRepository,
                 templateApplication().photoSaver
             )

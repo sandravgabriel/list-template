@@ -66,8 +66,7 @@ class ItemEditViewModel(
                 )
             } else {
                 // Fehlerbehandlung: z.B. itemUiState auf einen Fehlerzustand setzen oder eine Meldung anzeigen
-                // Fürs Erste könnten wir einen leeren Zustand setzen oder den alten beibehalten,
-                // aber idealerweise sollte der Nutzer informiert werden.
+                // idealerweise sollte der Nutzer informiert werden.
                 itemUiState = ItemUiState(isEntryValid = false) // Beispiel für einen leeren/ungültigen Zustand
             }
         }

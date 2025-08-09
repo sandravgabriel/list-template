@@ -89,6 +89,7 @@ fun ListTemplateAppContent(
                         // Fall 3: Ansichtsmodus (nur wenn ein gültiges Item ausgewählt ist)
                         detailScreenMode == DetailScreenMode.VIEW && itemId != null -> {
                             ItemDetailsScreen(
+                                itemIdFromNavArgs = null,
                                 selectedItemIdFromParent = itemId,
                                 provideScaffold = false,
                                 modifier = Modifier.padding(receivedPaddingValues),
