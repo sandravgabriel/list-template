@@ -1,5 +1,6 @@
 package de.gabriel.listtemplate.ui.navigation
 
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
@@ -32,7 +33,6 @@ fun ListTemplateNavHost(
                 navigateToItemEntry = { navController.navigate(ItemEntryDestination.route) },
                 onItemClick = { itemId ->
                     onItemSelectedInListScreen(itemId)
-                    navController.navigate("${ItemDetailsDestination.route}/${itemId}")
                 },
             )
         }
@@ -47,16 +47,12 @@ fun ListTemplateNavHost(
             arguments = listOf(navArgument(ItemDetailsDestination.ITEM_ID_ARG) {
                 type = NavType.IntType
             })
-        ) { backStackEntry -> // Zugriff auf backStackEntry, um Argumente zu lesen
-            // Hier greifen wir auf die itemId aus den Navigationsargumenten zu.
-            // Das ViewModel im ItemDetailsScreen wird dies typischerweise auch tun.
+        ) { backStackEntry ->
             val itemId = backStackEntry.arguments?.getInt(ItemDetailsDestination.ITEM_ID_ARG)
             ItemDetailsScreen(
                 itemIdFromNavArgs = itemId,
                 selectedItemIdFromParent = null,
-                // navigateToEditItem: Im Compact-Modus soll direkt zum ItemEditScreen navigiert werden.
-                // Die itemId wird dem ItemEditScreen als Navigationsargument übergeben.
-                navigateToEditItem = { currentItemId -> // currentItemId ist hier die ID des angezeigten Items
+                navigateToEditItem = { currentItemId ->
                     navController.navigate("${ItemEditDestination.route}/$currentItemId")
                 },
                 navigateBack = { navController.popBackStack() }

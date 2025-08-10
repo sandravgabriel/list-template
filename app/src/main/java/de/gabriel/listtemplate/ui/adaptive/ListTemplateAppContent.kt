@@ -71,14 +71,14 @@ fun ListTemplateAppContent(
                             ItemEntryScreen(
                                 provideScaffold = false,
                                 modifier = Modifier.padding(receivedPaddingValues),
-                                navigateBack = onBackFromDetail, // Schließt den Eingabebereich
-                                onNavigateUp = onBackFromDetail   // Schließt den Eingabebereich
+                                navigateBack = onBackFromDetail,
+                                onNavigateUp = onBackFromDetail
                             )
                         }
                         // Fall 2: Bearbeitungsmodus (nur wenn ein gültiges Item ausgewählt ist)
                         detailScreenMode == DetailScreenMode.EDIT && itemId != null -> {
                             ItemEditScreen(
-                                selectedItemId = itemId, // ItemID für das zu bearbeitende Item
+                                selectedItemId = itemId,
                                 provideScaffold = false,
                                 modifier = Modifier.padding(receivedPaddingValues),
                                 // Wenn Bearbeitung fertig oder abgebrochen -> zurück zur Detailansicht

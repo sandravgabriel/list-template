@@ -34,6 +34,19 @@ fun ListTemplateApp(navController: NavHostController = rememberNavController()) 
     var selectedItemId by rememberSaveable { mutableStateOf<Int?>(null) }
     var detailScreenMode by rememberSaveable { mutableStateOf(DetailScreenMode.VIEW) }
 
+    // Kann bei Bedarf temporär für Debugging der Navigation hinzugefügt werden:
+    /**
+    DisposableEffect(navController) {
+        val listener = NavController.OnDestinationChangedListener { controller, destination, arguments ->
+            Log.d("NAV_DEST_CHANGED", "New destination: ${destination.route}, Args: $arguments")
+        }
+        navController.addOnDestinationChangedListener(listener)
+        onDispose {
+            navController.removeOnDestinationChangedListener(listener)
+        }
+    }
+    **/
+
     ListTemplateAppContent(
         navController = navController,
         currentScreenWidthClass = currentScreenWidthClass,
