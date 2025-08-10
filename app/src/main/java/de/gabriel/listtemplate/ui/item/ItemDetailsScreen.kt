@@ -277,10 +277,8 @@ fun ItemDetails(
                         })
                         .build(),
                     contentDescription = "selected image",
-                    contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .padding(vertical = dimensionResource(id = R.dimen.padding_small))
-                        .aspectRatio(1f),
                 )
             } else {
                 Image(

@@ -222,6 +222,7 @@ private fun HomeItem(
                         colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.secondary),
                     )
                 }
+                Spacer(Modifier.weight(0.5f))
                 Text(
                     text = item.name,
                     style = MaterialTheme.typography.titleLarge,
