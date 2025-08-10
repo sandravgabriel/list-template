@@ -25,7 +25,6 @@ import de.gabriel.listtemplate.ui.item.ItemEntryDestination
 fun ListDetailLayout(
     selectedItemId: Int?,
     detailScreenMode: DetailScreenMode,
-    onItemSelected: (itemId: Int) -> Unit,
     onBack: () -> Unit,
     listPaneContent: @Composable (paddingValues: PaddingValues) -> Unit,
     detailPaneContent: @Composable (itemId: Int?, currentDetailMode: DetailScreenMode, paddingValues: PaddingValues) -> Unit,
@@ -43,7 +42,7 @@ fun ListDetailLayout(
             }
             TopAppBar(
                 title = stringResource(titleRes),
-                canNavigateBack = selectedItemId != null, // "Zurück" wenn Detail/Entry/Edit aktiv
+                canNavigateBack = false,
                 navigateUp = onBack
             )
         }

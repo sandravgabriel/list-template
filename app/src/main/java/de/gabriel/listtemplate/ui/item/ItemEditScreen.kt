@@ -61,7 +61,7 @@ fun ItemEditScreen(
                 }
             },
             onPhotoPickerSelect = viewModel::onPhotoPickerSelect,
-            modifier = Modifier
+            modifier = modifier
                 .padding(
                     start = paddingValuesFromParentScaffold.calculateStartPadding(
                         LocalLayoutDirection.current
@@ -87,35 +87,5 @@ fun ItemEditScreen(
         }
     } else {
         screenContent(PaddingValues(0.dp))
-    }
-
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = topAppBarTitle,
-                canNavigateBack = true,
-                navigateUp = onNavigateUp
-            )
-        },
-        modifier = modifier
-    ) { innerPadding ->
-        ItemEntryBody(
-            itemUiState = viewModel.itemUiState,
-            onItemValueChange = viewModel::updateUiState,
-            onSaveClick = {
-                coroutineScope.launch {
-                    viewModel.updateItem()
-                    navigateBack()
-                }
-            },
-            onPhotoPickerSelect = viewModel::onPhotoPickerSelect,
-            modifier = Modifier
-                .padding(
-                    start = innerPadding.calculateStartPadding(LocalLayoutDirection.current),
-                    end = innerPadding.calculateEndPadding(LocalLayoutDirection.current),
-                    top = innerPadding.calculateTopPadding()
-                )
-                .verticalScroll(rememberScrollState())
-        )
     }
 }

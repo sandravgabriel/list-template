@@ -54,7 +54,6 @@ fun ListTemplateAppContent(
                 modifier = modifier,
                 selectedItemId = selectedItemId,
                 detailScreenMode = detailScreenMode,
-                onItemSelected = onItemSelected,
                 onBack = onBackFromDetail,
                 listPaneContent = { receivedPaddingValues ->
                     HomeScreen(
