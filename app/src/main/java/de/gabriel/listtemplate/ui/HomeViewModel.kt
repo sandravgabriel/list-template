@@ -22,7 +22,7 @@ class HomeViewModel(
 
     init {
         viewModelScope.launch {
-            itemsRepository.getAllItemsStream(photoSaver.photoFolder).map { HomeUiState(it) }
+            itemsRepository.getAllItemsWithFiles(photoSaver.photoFolder).map { HomeUiState(it) }
                 .stateIn(
                     scope = viewModelScope,
                     started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
