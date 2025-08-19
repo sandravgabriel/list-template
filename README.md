@@ -94,12 +94,3 @@ The project includes a starter setup for:
     *   Run with: `./gradlew testDebugUnitTest`
 *   **Instrumented/UI Tests (Optional - if you add them):** Located in `app/src/androidTest/`.
     *   Run with: `./gradlew connectedAndroidTest`
-
-## 🙏 Acknowledgements
-
-*   [Kotlin](https://kotlinlang.org/)
-*   [Jetpack Compose](https://developer.android.com/jetpack/compose)
-*   [Room Persistence Library](https://developer.android.com/training/data-storage/room)
-*   [Coil](https://coil-kt.github.io/coil/)
-*   [PhotoPicker](https://developer.android.com/training/data-storage/shared/photopicker)
-<!-- Add any other libraries or inspirations -->
