@@ -1,7 +1,7 @@
 # List Template: Android App Template
 
-[![Kotlin Version](https://img.shields.io/badge/Kotlin-LATEST_KOTLIN_VERSION-blue.svg)](https://kotlinlang.org)
-[![Jetpack Compose](https://img.shields.io/badge/Jetpack%20Compose-LATEST_COMPOSE_VERSION-brightgreen.svg)](https://developer.android.com/jetpack/compose)
+[![Kotlin Version](https://img.shields.io/badge/Kotlin-2.2.10-blue.svg)](https://kotlinlang.org)
+[![Jetpack Compose](https://img.shields.io/badge/Jetpack%20Compose-2025.08.00-brightgreen.svg)](https://developer.android.com/jetpack/compose)
 
 A modern Android application template built with Kotlin and Jetpack Compose, designed to provide a solid foundation for list-based applications. It features local data storage using Room and image handling with PhotoPicker and Coil.
 
@@ -102,4 +102,4 @@ The project includes a starter setup for:
 *   [Room Persistence Library](https://developer.android.com/training/data-storage/room)
 *   [Coil](https://coil-kt.github.io/coil/)
 *   [PhotoPicker](https://developer.android.com/training/data-storage/shared/photopicker)
-*   <!-- Add any other libraries or inspirations -->
+<!-- Add any other libraries or inspirations -->

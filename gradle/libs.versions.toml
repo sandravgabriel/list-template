@@ -1,7 +1,7 @@
 [versions]
 # Gradle Plugins
 agp = "8.12.1"
-kotlin = "2.2.0"
+kotlin = "2.2.10"
 ksp = "2.2.0-2.0.2"
 
 # AndroidX Libraries
