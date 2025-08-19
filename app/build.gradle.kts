@@ -44,6 +44,12 @@ android {
     buildFeatures {
         compose = true
     }
+    testOptions {
+        unitTests {
+            // Diese Option ist wichtig, damit Robolectric auf Android-Ressourcen zugreifen kann
+            isIncludeAndroidResources = true
+        }
+    }
 }
 
 dependencies {
@@ -71,4 +77,9 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
+    testImplementation(libs.mockk.core)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.androidx.test.core.ktx) // AndroidX Test Core - nützlich für das Holen von ApplicationContext in Robolectric-Tests
+    // testImplementation(libs.androidx.test.rules)
 }

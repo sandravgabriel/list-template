@@ -8,13 +8,13 @@ import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.io.FileNotFoundException
 import java.io.IOException
 
 class PhotoSaverRepository(context: Context, private val contentResolver: ContentResolver) {
 
     @VisibleForTesting
     internal var photo: File? = null
-
 
     private val cacheFolder = File(context.cacheDir, "photos").also { it.mkdir() }
     val photoFolder = File(context.filesDir, "photos").also { it.mkdir() }
@@ -23,15 +23,24 @@ class PhotoSaverRepository(context: Context, private val contentResolver: Conten
     fun generatePhotoCacheFile() = File(cacheFolder, generateFileName())
 
     suspend fun cacheFromUri(uri: Uri) {
+        photo = null // Zurücksetzen am Anfang
+
         withContext(Dispatchers.IO) {
-
-            contentResolver.openInputStream(uri)?.use { input ->
-                val cachedPhoto = generatePhotoCacheFile()
-
-                cachedPhoto.outputStream().use { output ->
-                    input.copyTo(output)
-                    photo = cachedPhoto
+            val targetFile = generatePhotoCacheFile()
+            try {
+                contentResolver.openInputStream(uri)?.use { inputStream ->
+                    // FileOutputStream(targetFile).use { outputStream -> // Alternative 1
+                    targetFile.outputStream().use { outputStream ->      // Alternative 2 (idiomatischer)
+                        inputStream.copyTo(outputStream)
+                    }
+                    photo = targetFile
                 }
+            } catch (e: FileNotFoundException) {
+                Log.e("PhotoSaverRepository", "File not found for URI: $uri", e)
+                targetFile.delete() // Versuch aufzuräumen
+            } catch (e: IOException) {
+                Log.e("PhotoSaverRepository", "Error caching photo from URI: $uri", e)
+                targetFile.delete() // Versuch aufzuräumen
             }
         }
     }
