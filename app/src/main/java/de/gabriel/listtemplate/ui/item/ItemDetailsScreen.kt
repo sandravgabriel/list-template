@@ -46,7 +46,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.dimensionResource
@@ -211,7 +210,6 @@ private fun ItemDetailsBody(
                 modifier = Modifier.fillMaxWidth()
             )
         } else {
-            // TODO:
             // Optional: Zeige einen Ladeindikator oder nichts, da die Navigation bald stattfinden sollte.
             // Text("Item wird geladen oder ist nicht verfügbar...")
         }
@@ -271,9 +269,9 @@ fun ItemDetails(
                     model = ImageRequest.Builder(LocalContext.current)
                         .data(item.image)
                         .placeholder(R.drawable.default_image)
-                        //.error(R.drawable.ic_error_image) // TODO: Ein Fehler-Drawable
+                        .error(R.drawable.error_24px)
                         .listener(onError = { request, result ->
-                            Log.e("Coil", "Fehler beim Laden von ${request.data}: ${result.throwable}") //TODO
+                            Log.e("Coil", "Error loading image for ${request.data}: ${result.throwable}")
                         })
                         .build(),
                     contentDescription = "selected image",

@@ -199,9 +199,9 @@ private fun HomeItem(
                         model = ImageRequest.Builder(LocalContext.current)
                             .data(item.image)
                             .placeholder(R.drawable.default_image)
-                            //.error(R.drawable.ic_error_image) // TODO: Ein Fehler-Drawable
+                            .error(R.drawable.error_24px)
                             .listener(onError = { request, result ->
-                                Log.e("Coil", "Fehler beim Laden von ${request.data}: ${result.throwable}") //TODO
+                                Log.e("Coil", "Error loading image for ${request.data}: ${result.throwable}")
                             })
                             .build(),
                         contentDescription = "selected image",
