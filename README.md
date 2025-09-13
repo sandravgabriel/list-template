@@ -32,19 +32,8 @@ This template incorporates a basic structure for building adaptive user interfac
 
 ### Prerequisites
 
-*   Android Studio [Latest Stable Version Recommended]
+*   Android Studio (Latest Stable Version Recommended)
 *   JDK 17 or higher
-
-### Key Components
-
-*   **`app/src/main/java/de/gabriel/listtemplate/data/`**: Contains all data handling logic.
-    *   **`local/`**: Room Database, Data Access Objects (DAOs), and Entities.
-    *   **`PhotoSaverRepository.kt`**: Handles saving and retrieving image files selected via PhotoPicker.
-    *   **`ItemsRepository.kt`**: Interface and implementation for accessing item data (combining Room data with file information).
-*   **`app/src/main/java/de/gabriel/listtemplate/ui/`**: Contains all UI-related code.
-    *   **`screens/`**: Each sub-package typically represents a screen with its `ViewModel` and Composable functions.
-    *   **`navigation/AppNavigation.kt`**: Defines the navigation graph using Navigation Compose.
-*   **`libs.versions.toml`**: Centralized dependency version management.
 
 ## 🏛️ Architecture
 
@@ -88,7 +77,7 @@ This template follows the **MVVM (Model-View-ViewModel)** architectural pattern:
 
 ## 🧪 Testing
 
-The project includes a starter setup for:
+The project includes a starter setup for (which is currently WIP):
 
 *   **Unit Tests:** Located in `app/src/test/`. These test ViewModels and other business logic components using JUnit 4 and MockK. Turbine is used for testing Kotlin Flows.
     *   Run with: `./gradlew testDebugUnitTest`
