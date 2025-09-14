@@ -1,70 +1,52 @@
 package de.gabriel.listtemplate
 
-import android.app.Activity
-import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
-import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.material3.Text
+import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
+import androidx.compose.material3.adaptive.navigation.NavigableListDetailPaneScaffold
+import androidx.compose.material3.adaptive.navigation.rememberListDetailPaneScaffoldNavigator
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import de.gabriel.listtemplate.ui.adaptivebase.ListTemplateAppContent
-import de.gabriel.listtemplate.ui.item.ItemDetailsDestination
-import de.gabriel.listtemplate.ui.item.ItemEntryDestination
+import de.gabriel.listtemplate.ui.HomeScreen
+import kotlinx.coroutines.launch
 
-enum class DetailScreenMode {
-    VIEW,
-    EDIT
-}
-
-const val ENTRY_ITEM_ID = -1
-
-@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
+@OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
-fun ListTemplateApp(navController: NavHostController = rememberNavController()) {
-    val context = LocalContext.current
-    val activity = context as Activity
-    val windowSizeClass = calculateWindowSizeClass(activity)
-    val currentScreenWidthClass = windowSizeClass.widthSizeClass
+fun ListTemplateApp(
+    modifier: Modifier = Modifier,
+    navController: NavHostController = rememberNavController()
+) {
+    val navigator = rememberListDetailPaneScaffoldNavigator<Int?>()
+    val scope = rememberCoroutineScope()
 
-    var selectedItemId by rememberSaveable { mutableStateOf<Int?>(null) }
-    var detailScreenMode by rememberSaveable { mutableStateOf(DetailScreenMode.VIEW) }
-
-    ListTemplateAppContent(
-        navController = navController,
-        currentScreenWidthClass = currentScreenWidthClass,
-        selectedItemId = selectedItemId,
-        detailScreenMode = detailScreenMode,
-        onItemSelected = { itemId ->
-            selectedItemId = itemId
-            // Wenn ein neues Item ausgewählt wird (oder der Entry-Modus gestartet wird),
-            // immer zur VIEW-Ansicht des Details zurückkehren.
-            detailScreenMode = DetailScreenMode.VIEW
-            if (currentScreenWidthClass != WindowWidthSizeClass.Expanded && itemId != ENTRY_ITEM_ID) {
-                navController.navigate("${ItemDetailsDestination.route}/$itemId")
-            } else if (currentScreenWidthClass != WindowWidthSizeClass.Expanded && itemId == ENTRY_ITEM_ID) {
-                navController.navigate(ItemEntryDestination.route)
-            }
+    NavigableListDetailPaneScaffold<Int?>(
+        modifier = modifier,
+        navigator = navigator,
+        listPane = {
+            HomeScreen(
+                navigateToItemEntry = { /*TODO? */ },
+                onItemClick = { itemId ->
+                    scope.launch {
+                        navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, itemId)
+                    }
+                },
+                provideScaffold = false
+            )
         },
-        onNavigateToEditInDetailPane = {
-            detailScreenMode = DetailScreenMode.EDIT
-        },
-        onBackFromDetail = {
-            if (detailScreenMode == DetailScreenMode.EDIT && selectedItemId != null && selectedItemId != ENTRY_ITEM_ID) {
-                // Wenn im Edit-Modus und "zurück", dann zur Detail-View zurückkehren
-                detailScreenMode = DetailScreenMode.VIEW
-            } else {
-                // Sonst: Detailbereich leeren (selectedItemId auf null setzen)
-                // und sicherstellen, dass der Modus für das nächste Mal auf VIEW steht.
-                selectedItemId = null
-                detailScreenMode = DetailScreenMode.VIEW
-            }
-            if (currentScreenWidthClass != WindowWidthSizeClass.Expanded) {
-                navController.popBackStack()
+        detailPane = {
+            AnimatedContent(
+                targetState = navigator.currentDestination?.contentKey,
+                label = "DetailPaneAnimation"
+            ) { selectedItemId: Int? ->
+                if (selectedItemId != null) {
+                    Text(text = "Displaying details for item ID: $selectedItemId")
+                } else {
+                    Text(text = "Select an item to view its details.")
+                }
             }
         }
     )

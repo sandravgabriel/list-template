@@ -1,4 +1,4 @@
-package de.gabriel.listtemplate.ui.adaptivebase
+package de.gabriel.listtemplate.ui.baseadaptive
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,9 +10,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavHostController
-import de.gabriel.listtemplate.DetailScreenMode
-import de.gabriel.listtemplate.ENTRY_ITEM_ID
 import de.gabriel.listtemplate.R
+import de.gabriel.listtemplate.ui.HomeScreen
 import de.gabriel.listtemplate.ui.item.ItemDetailsScreen
 import de.gabriel.listtemplate.ui.item.ItemEditScreen
 import de.gabriel.listtemplate.ui.item.ItemEntryScreen
@@ -55,7 +54,7 @@ fun ListTemplateAppContent(
                 detailScreenMode = detailScreenMode,
                 onBack = onBackFromDetail,
                 listPaneContent = { receivedPaddingValues ->
-                    HomeScreenAdaptiveBase(
+                    HomeScreen(
                         navigateToItemEntry = { onItemSelected(ENTRY_ITEM_ID) },
                         onItemClick = onItemSelected,
                         modifier = Modifier.padding(receivedPaddingValues),

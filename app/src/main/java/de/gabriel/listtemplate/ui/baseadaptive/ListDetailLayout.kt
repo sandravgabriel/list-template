@@ -1,4 +1,4 @@
-package de.gabriel.listtemplate.ui.adaptivebase
+package de.gabriel.listtemplate.ui.baseadaptive
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -9,8 +9,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import de.gabriel.listtemplate.DetailScreenMode
-import de.gabriel.listtemplate.ENTRY_ITEM_ID
 import de.gabriel.listtemplate.R
 import de.gabriel.listtemplate.ui.common.TopAppBar
 import de.gabriel.listtemplate.ui.item.ItemDetailsDestination
