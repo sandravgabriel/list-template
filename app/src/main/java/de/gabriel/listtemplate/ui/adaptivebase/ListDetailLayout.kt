@@ -1,4 +1,4 @@
-package de.gabriel.listtemplate.ui.adaptive
+package de.gabriel.listtemplate.ui.adaptivebase
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues

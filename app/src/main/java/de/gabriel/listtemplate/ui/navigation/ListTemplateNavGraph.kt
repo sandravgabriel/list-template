@@ -7,8 +7,8 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import de.gabriel.listtemplate.ui.HomeDestination
-import de.gabriel.listtemplate.ui.HomeScreen
+import de.gabriel.listtemplate.ui.adaptivebase.HomeDestination
+import de.gabriel.listtemplate.ui.adaptivebase.HomeScreenAdaptiveBase
 import de.gabriel.listtemplate.ui.item.ItemDetailsDestination
 import de.gabriel.listtemplate.ui.item.ItemDetailsScreen
 import de.gabriel.listtemplate.ui.item.ItemEditDestination
@@ -28,7 +28,7 @@ fun ListTemplateNavHost(
         modifier = modifier
     ) {
         composable(route = HomeDestination.route) {
-            HomeScreen(
+            HomeScreenAdaptiveBase(
                 navigateToItemEntry = { navController.navigate(ItemEntryDestination.route) },
                 onItemClick = { itemId ->
                     onItemSelectedInListScreen(itemId)

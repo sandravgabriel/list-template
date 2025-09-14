@@ -12,7 +12,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import de.gabriel.listtemplate.ui.adaptive.ListTemplateAppContent
+import de.gabriel.listtemplate.ui.adaptivebase.ListTemplateAppContent
 import de.gabriel.listtemplate.ui.item.ItemDetailsDestination
 import de.gabriel.listtemplate.ui.item.ItemEntryDestination
 

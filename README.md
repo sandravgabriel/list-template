@@ -26,7 +26,7 @@ This template incorporates a basic structure for building adaptive user interfac
 *   **Responsive Layouts:** The UI is designed to adjust its layout based on the available screen width. For example, a typical list-detail scenario might display as a single pane (list navigates to detail) on smaller screens (phones) and transition to a two-pane layout (list and detail side-by-side) on larger screens (tablets, foldables, desktops).
 *   **Compose-Powered:** Leveraging the power of Jetpack Compose, screen configurations are typically determined at the Composable level, allowing ViewModels to remain largely unaware of specific display sizes.
 *   **Foundation for Growth:** While this template provides a foundational adaptive setup, it is designed to be easily extensible. You can build upon this base to implement more sophisticated adaptive behaviors and support a wider range of screen configurations as your application evolves.
-<!-- Further details on the specific implementation and how to extend the adaptive behavior can be found in the project's [Wiki](LINK_TO_YOUR_WIKI_PAGE_LATER). -->
+<!-- Further details on the specific implementation and how to extend the adaptivebase behavior can be found in the project's [Wiki](LINK_TO_YOUR_WIKI_PAGE_LATER). -->
 
 ## 🚀 Getting Started
 

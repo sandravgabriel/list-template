@@ -1,4 +1,4 @@
-package de.gabriel.listtemplate.ui
+package de.gabriel.listtemplate.ui.adaptivebase
 
 import android.util.Log
 import androidx.compose.foundation.Image
@@ -55,6 +55,8 @@ import de.gabriel.listtemplate.ui.common.TopAppBar
 import de.gabriel.listtemplate.R
 import de.gabriel.listtemplate.data.Item
 import de.gabriel.listtemplate.data.ItemEntry
+import de.gabriel.listtemplate.ui.AppViewModelProvider
+import de.gabriel.listtemplate.ui.HomeViewModel
 import de.gabriel.listtemplate.ui.navigation.NavigationDestination
 import de.gabriel.listtemplate.ui.theme.ListTemplateTheme
 
@@ -65,7 +67,7 @@ object HomeDestination : NavigationDestination {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(
+fun HomeScreenAdaptiveBase(
     navigateToItemEntry: () -> Unit,
     onItemClick: (Int) -> Unit,
     modifier: Modifier = Modifier,
@@ -75,7 +77,6 @@ fun HomeScreen(
 ) {
     val homeUiState by viewModel.homeUiState.collectAsState()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
-
     val screenContent = @Composable { paddingValuesFromParentScaffold: PaddingValues ->
         Box(modifier = modifier.fillMaxSize()) {
             HomeBody(
