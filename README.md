@@ -1,7 +1,7 @@
 # List Template: Android App Template
 
-[![Kotlin Version](https://img.shields.io/badge/Kotlin-2.2.10-blue.svg)](https://kotlinlang.org)
-[![Jetpack Compose](https://img.shields.io/badge/Jetpack%20Compose-2025.08.00-brightgreen.svg)](https://developer.android.com/jetpack/compose)
+[![Kotlin Version](https://img.shields.io/badge/Kotlin-2.2.20-blue.svg)](https://kotlinlang.org)
+[![Jetpack Compose](https://img.shields.io/badge/Jetpack%20Compose-2025.09.00-brightgreen.svg)](https://developer.android.com/jetpack/compose)
 
 A modern Android application template built with Kotlin and Jetpack Compose, designed to provide a solid foundation for list-based applications. It features local data storage using Room and image handling with PhotoPicker and Coil.
 
@@ -77,7 +77,7 @@ This template follows the **MVVM (Model-View-ViewModel)** architectural pattern:
 
 ## 🧪 Testing
 
-The project includes a starter setup for (which is currently WIP):
+The project includes a starter setup for testing (which is currently WIP):
 
 *   **Unit Tests:** Located in `app/src/test/`. These test ViewModels and other business logic components using JUnit 4 and MockK. Turbine is used for testing Kotlin Flows.
     *   Run with: `./gradlew testDebugUnitTest`
