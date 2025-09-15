@@ -43,6 +43,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.dimensionResource
@@ -194,7 +195,6 @@ private fun ItemDetailsBody(
             Text("Item konnte nicht geladen werden.")
              // TODO: Text(stringResource(R.string.item_details_empty)) Zeige Text wenn kein Item geladen
         }
-        // Löschbutton nur anzeigen, wenn ein Item geladen ist
         if (itemDetails != null) {
             OutlinedButton(
                 onClick = { deleteConfirmationRequired = true },
@@ -237,7 +237,8 @@ fun ItemDetails(
                 .padding(dimensionResource(id = R.dimen.padding_medium)),
             verticalArrangement = Arrangement.spacedBy(
                 dimensionResource(id = R.dimen.padding_medium)
-            )
+            ),
+            horizontalAlignment = Alignment.CenterHorizontally // Zentriert Kinder horizontal
         ) {
             ItemDetailsRow(
                 itemDetail = item.name,
@@ -259,15 +260,18 @@ fun ItemDetails(
                         })
                         .build(),
                     contentDescription = "selected image",
+                    contentScale = ContentScale.Fit, // Stellt sicher, dass das Bild skaliert wird, um hinein zu passen
                     modifier = Modifier
+                        .fillMaxWidth(0.75f) // Nimmt maximal 75% der Breite des Elternelements ein
                         .padding(vertical = dimensionResource(id = R.dimen.padding_small))
+                        // .align(Alignment.CenterHorizontally) ist nicht mehr nötig, da die Column es zentriert
                 )
             } else {
                 Image(
                     painter = painter,
                     contentDescription = "default image",
                     modifier = Modifier
-                        .fillMaxWidth(fraction = 0.4f)
+                        .fillMaxWidth(fraction = 0.4f) // Beibehaltung der ursprünglichen Größe für das Default-Bild
                         .aspectRatio(1f)
                         .padding(
                             horizontal = dimensionResource(

@@ -119,7 +119,7 @@ fun ListTemplateApp(
                     navController.navigate("${ItemEditDestination.route}/$currentItemId")
                 },
                 navigateBack = { navController.popBackStack() },
-                provideScaffold = true // ItemDetailsScreen stellt eigenen Scaffold bereit
+                provideScaffold = true
             )
         }
 
