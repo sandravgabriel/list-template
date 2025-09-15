@@ -1,5 +1,6 @@
 package de.gabriel.listtemplate
 
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.material3.Text
@@ -17,6 +18,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import de.gabriel.listtemplate.ui.HomeDestination
 import de.gabriel.listtemplate.ui.HomeScreen
+import de.gabriel.listtemplate.ui.item.ItemDetailsScreen // Import hinzugefügt
 import de.gabriel.listtemplate.ui.item.ItemEntryDestination
 import de.gabriel.listtemplate.ui.item.ItemEntryScreen
 import kotlinx.coroutines.launch
@@ -26,7 +28,7 @@ import kotlinx.coroutines.launch
 fun ListTemplateApp(
     modifier: Modifier = Modifier
 ) {
-    val navController: NavHostController = rememberNavController()
+    val navController: NavHostController = rememberNavController() // Dieser NavController wird aktuell nur für ItemEntry verwendet
     val navigator = rememberListDetailPaneScaffoldNavigator<Int?>()
     val scope = rememberCoroutineScope()
 
@@ -57,7 +59,25 @@ fun ListTemplateApp(
                             label = "DetailPaneAnimation"
                         ) { selectedItemId: Int? ->
                             if (selectedItemId != null) {
-                                Text(text = "Displaying details for item ID: $selectedItemId")
+                                ItemDetailsScreen(
+                                    selectedItemIdFromParent = selectedItemId,
+                                    onClosePane = {
+                                        scope.launch {
+                                            navigator.navigateBack()
+                                        }
+                                    },
+                                    provideScaffold = false,
+                                    // TODO: Definiere die Navigation zum Bearbeiten, wenn der NavGraph konsolidiert ist.
+                                    // Momentan kennt der NavHost in ListTemplateApp die ItemEditDestination nicht.
+                                    navigateToEditItem = { itemId -> Log.d("ListTemplateApp", "Navigate to edit item $itemId") },
+                                    navigateBack = {
+                                        scope.launch {
+                                            navigator.navigateBack()
+                                        }
+                                    },
+                                    modifier = modifier,
+                                    itemIdFromNavArgs = null
+                                )
                             } else {
                                 Text(text = "Select an item to view its details.")
                             }
@@ -65,7 +85,6 @@ fun ListTemplateApp(
                     }
                 }
             )
-            // BackHandler für den listDetailPaneNavigator, spezifisch für diese Route
             BackHandler(enabled = navigator.canNavigateBack()) {
                 scope.launch {
                     navigator.navigateBack()

@@ -1,6 +1,5 @@
 package de.gabriel.listtemplate.ui.item
 
-import android.app.Activity
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -33,8 +32,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
-import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -76,29 +73,21 @@ object ItemDetailsDestination : NavigationDestination {
 @Composable
 fun ItemDetailsScreen(
     navigateToEditItem: (Int) -> Unit,
-    navigateBack: () -> Unit,
+    navigateBack: () -> Unit, // Für traditionelle Navigation oder wenn Scaffold selbst bereitgestellt wird
     modifier: Modifier = Modifier,
-    itemIdFromNavArgs: Int?,
-    selectedItemIdFromParent: Int? = null,
+    itemIdFromNavArgs: Int?,      // Für direkte Navigation zum Screen
+    selectedItemIdFromParent: Int? = null, // Von List-Detail Parent injiziert
+    onClosePane: (() -> Unit)? = null,      // Callback zum Schließen des Panes, von List-Detail Parent injiziert
     viewModel: ItemDetailsViewModel = viewModel(factory = AppViewModelProvider.Factory),
-    provideScaffold: Boolean = true,
+    provideScaffold: Boolean = true, // false, wenn in List-Detail gehostet
     topAppBarTitle: String = stringResource(ItemDetailsDestination.titleRes)
 ) {
-    val context = LocalContext.current
-    val activity = context as Activity
-    val windowSizeClass = calculateWindowSizeClass(activity)
-    val currentScreenWidthClass = windowSizeClass.widthSizeClass
     val uiState by viewModel.uiState.collectAsState()
     val coroutineScope = rememberCoroutineScope()
     var showDeleteFailedDialog by rememberSaveable { mutableStateOf(false) }
 
-    // Dieser LaunchedEffect reagiert, wenn selectedItemIdFromParent sich ändert
-    LaunchedEffect(key1 = itemIdFromNavArgs, key2 = selectedItemIdFromParent, key3 = currentScreenWidthClass) {
-        val itemIdToLoad = if (currentScreenWidthClass == WindowWidthSizeClass.Expanded) {
-            selectedItemIdFromParent
-        } else {
-            itemIdFromNavArgs
-        }
+    LaunchedEffect(key1 = selectedItemIdFromParent, key2 = itemIdFromNavArgs) {
+        val itemIdToLoad = selectedItemIdFromParent ?: itemIdFromNavArgs
 
         if (itemIdToLoad != null && itemIdToLoad > 0) {
             viewModel.loadItemDetailsForId(itemIdToLoad)
@@ -114,7 +103,7 @@ fun ItemDetailsScreen(
                 onDelete = {
                     coroutineScope.launch {
                         if (viewModel.deleteItem()) {
-                            navigateBack()
+                            onClosePane?.invoke() ?: navigateBack()
                         } else {
                             showDeleteFailedDialog = true
                         }
@@ -135,18 +124,10 @@ fun ItemDetailsScreen(
             )
             FloatingActionButton(
                 onClick = {
-                    val idForEdit: Int = if (currentScreenWidthClass == WindowWidthSizeClass.Expanded) {
-                        // Im Expanded-Modus, verwende selectedItemIdFromParent, aber mit Vorsicht
-                        selectedItemIdFromParent ?: 0 // oder eine bessere Fehlerbehandlung
-                    } else {
-                        // Im Compact-Modus, verwende die ID aus dem itemDetails des ViewModels
-                        uiState.itemDetails?.id ?: 0
-                    }
-
+                    val idForEdit = selectedItemIdFromParent ?: (uiState.itemDetails?.id ?: 0) // Fallback für Standalone-Modus
                     if (idForEdit > 0) { // Nur navigieren, wenn die ID gültig ist
                         navigateToEditItem(idForEdit)
                     } else {
-                        // Logge einen Fehler oder zeige eine Meldung, dass die ID ungültig ist
                         Log.e("ItemDetailsScreen", "Attempted to navigate to edit with invalid ID: $idForEdit")
                     }
                 },
@@ -180,7 +161,7 @@ fun ItemDetailsScreen(
                 TopAppBar(
                     title = topAppBarTitle,
                     canNavigateBack = true,
-                    navigateUp = navigateBack
+                    navigateUp = navigateBack // Im Standalone-Modus ist navigateUp = navigateBack
                 )
             }
         ) { innerPadding ->
@@ -210,15 +191,18 @@ private fun ItemDetailsBody(
                 modifier = Modifier.fillMaxWidth()
             )
         } else {
-            // Optional: Zeige einen Ladeindikator oder nichts, da die Navigation bald stattfinden sollte.
-            // Text("Item wird geladen oder ist nicht verfügbar...")
+            Text("Item konnte nicht geladen werden.")
+             // TODO: Text(stringResource(R.string.item_details_empty)) Zeige Text wenn kein Item geladen
         }
-        OutlinedButton(
-            onClick = { deleteConfirmationRequired = true },
-            shape = MaterialTheme.shapes.small,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(stringResource(R.string.delete))
+        // Löschbutton nur anzeigen, wenn ein Item geladen ist
+        if (itemDetails != null) {
+            OutlinedButton(
+                onClick = { deleteConfirmationRequired = true },
+                shape = MaterialTheme.shapes.small,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(stringResource(R.string.delete))
+            }
         }
         if (deleteConfirmationRequired) {
             DeleteConfirmationDialog(
