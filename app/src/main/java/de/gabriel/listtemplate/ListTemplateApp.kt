@@ -1,6 +1,5 @@
 package de.gabriel.listtemplate
 
-import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.material3.Text
@@ -13,12 +12,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import de.gabriel.listtemplate.ui.HomeDestination
 import de.gabriel.listtemplate.ui.HomeScreen
-import de.gabriel.listtemplate.ui.item.ItemDetailsScreen // Import hinzugefügt
+import de.gabriel.listtemplate.ui.item.ItemDetailsDestination
+import de.gabriel.listtemplate.ui.item.ItemDetailsScreen
+import de.gabriel.listtemplate.ui.item.ItemEditDestination
+import de.gabriel.listtemplate.ui.item.ItemEditScreen
 import de.gabriel.listtemplate.ui.item.ItemEntryDestination
 import de.gabriel.listtemplate.ui.item.ItemEntryScreen
 import kotlinx.coroutines.launch
@@ -28,15 +32,15 @@ import kotlinx.coroutines.launch
 fun ListTemplateApp(
     modifier: Modifier = Modifier
 ) {
-    val navController: NavHostController = rememberNavController() // Dieser NavController wird aktuell nur für ItemEntry verwendet
-    val navigator = rememberListDetailPaneScaffoldNavigator<Int?>()
+    val navController: NavHostController = rememberNavController()
+    val listDetailPaneNavigator = rememberListDetailPaneScaffoldNavigator<Int?>()
     val scope = rememberCoroutineScope()
 
     NavHost(navController = navController, startDestination = HomeDestination.route) {
         composable(HomeDestination.route) {
-            NavigableListDetailPaneScaffold(
-                modifier = modifier,
-                navigator = navigator,
+            NavigableListDetailPaneScaffold<Int?>(
+                modifier = modifier, // Modifier für den Scaffold selbst
+                navigator = listDetailPaneNavigator,
                 listPane = {
                     AnimatedPane(modifier = Modifier) {
                         HomeScreen(
@@ -45,7 +49,7 @@ fun ListTemplateApp(
                             },
                             onItemClick = { itemId ->
                                 scope.launch {
-                                    navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, itemId)
+                                    listDetailPaneNavigator.navigateTo(ListDetailPaneScaffoldRole.Detail, itemId)
                                 }
                             },
                             provideScaffold = false
@@ -55,7 +59,7 @@ fun ListTemplateApp(
                 detailPane = {
                     AnimatedPane(modifier = Modifier) {
                         AnimatedContent(
-                            targetState = navigator.currentDestination?.contentKey,
+                            targetState = listDetailPaneNavigator.currentDestination?.contentKey,
                             label = "DetailPaneAnimation"
                         ) { selectedItemId: Int? ->
                             if (selectedItemId != null) {
@@ -63,20 +67,20 @@ fun ListTemplateApp(
                                     selectedItemIdFromParent = selectedItemId,
                                     onClosePane = {
                                         scope.launch {
-                                            navigator.navigateBack()
+                                            listDetailPaneNavigator.navigateBack()
+                                        }
+                                    },
+                                    navigateToEditItem = { itemId ->
+                                        navController.navigate("${ItemEditDestination.route}/$itemId")
+                                    },
+                                    navigateBack = {
+                                        scope.launch {
+                                            listDetailPaneNavigator.navigateBack()
                                         }
                                     },
                                     provideScaffold = false,
-                                    // TODO: Definiere die Navigation zum Bearbeiten, wenn der NavGraph konsolidiert ist.
-                                    // Momentan kennt der NavHost in ListTemplateApp die ItemEditDestination nicht.
-                                    navigateToEditItem = { itemId -> Log.d("ListTemplateApp", "Navigate to edit item $itemId") },
-                                    navigateBack = {
-                                        scope.launch {
-                                            navigator.navigateBack()
-                                        }
-                                    },
-                                    modifier = modifier,
                                     itemIdFromNavArgs = null
+                                    // Der Modifier wird hier nicht benötigt, da AnimatedPane den Modifier bereits hat
                                 )
                             } else {
                                 Text(text = "Select an item to view its details.")
@@ -85,20 +89,50 @@ fun ListTemplateApp(
                     }
                 }
             )
-            BackHandler(enabled = navigator.canNavigateBack()) {
+            BackHandler(enabled = listDetailPaneNavigator.canNavigateBack()) {
                 scope.launch {
-                    navigator.navigateBack()
+                    listDetailPaneNavigator.navigateBack()
                 }
             }
         }
-            composable(ItemEntryDestination.route) {
-                ItemEntryScreen(
-                    navigateBack = { navController.popBackStack() },
-                    onNavigateUp = { navController.popBackStack() }
-                )
-            }
 
-            // Hier könnten weitere globale Routen definiert werden (z.B. Settings, etc.)
-            // composable("settings") { SettingsScreen(appNavController) }
+        composable(route = ItemEntryDestination.route) {
+            ItemEntryScreen(
+                navigateBack = { navController.popBackStack() },
+                onNavigateUp = { navController.navigateUp() }
+            )
+        }
+
+        // Standalone-Route für ItemDetailsScreen (z.B. für schmale Bildschirme oder direkte Links)
+        composable(
+            route = ItemDetailsDestination.routeWithArgs,
+            arguments = listOf(navArgument(ItemDetailsDestination.ITEM_ID_ARG) {
+                type = NavType.IntType
+            })
+        ) { backStackEntry ->
+            val itemId = backStackEntry.arguments?.getInt(ItemDetailsDestination.ITEM_ID_ARG)
+            ItemDetailsScreen(
+                itemIdFromNavArgs = itemId,
+                selectedItemIdFromParent = null,
+                onClosePane = null, // Kein Pane zum Schließen im Standalone-Modus
+                navigateToEditItem = { currentItemId ->
+                    navController.navigate("${ItemEditDestination.route}/$currentItemId")
+                },
+                navigateBack = { navController.popBackStack() },
+                provideScaffold = true // ItemDetailsScreen stellt eigenen Scaffold bereit
+            )
+        }
+
+        composable(
+            route = ItemEditDestination.routeWithArgs,
+            arguments = listOf(navArgument(ItemEditDestination.ITEM_ID_ARG) {
+                type = NavType.IntType
+            })
+        ) {
+            ItemEditScreen(
+                navigateBack = { navController.popBackStack() },
+                onNavigateUp = { navController.navigateUp() }
+            )
+        }
     }
 }

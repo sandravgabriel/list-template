@@ -15,7 +15,7 @@ import de.gabriel.listtemplate.ui.HomeScreen
 import de.gabriel.listtemplate.ui.item.ItemDetailsScreen
 import de.gabriel.listtemplate.ui.item.ItemEditScreen
 import de.gabriel.listtemplate.ui.item.ItemEntryScreen
-import de.gabriel.listtemplate.ui.navigation.ListTemplateNavHost
+import de.gabriel.listtemplate.ui.baseadaptive.ListTemplateNavHost
 
 @Composable
 fun ListTemplateAppContent(
