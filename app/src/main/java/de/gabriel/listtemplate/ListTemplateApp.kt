@@ -52,7 +52,6 @@ fun ListTemplateApp(
             NavigableListDetailPaneScaffold<DetailPaneState>(
                 modifier = modifier,
                 navigator = listDetailPaneNavigator,
-                defaultBackBehavior = BackNavigationBehavior.PopUntilScaffoldValueChange,
                 listPane = {
                     AnimatedPane(modifier = Modifier) {
                         Column {
@@ -120,6 +119,19 @@ fun ListTemplateApp(
                                                 )
                                             }
                                         },
+                                        onNavigateBackInPane = { 
+                                            val itemId = (listDetailPaneNavigator.currentDestination?.contentKey as? DetailPaneState.EditItem)?.itemId
+                                            if (itemId != null) {
+                                                scope.launch {
+                                                    listDetailPaneNavigator.navigateTo(
+                                                        ListDetailPaneScaffoldRole.Detail,
+                                                        DetailPaneState.ViewItem(itemId)
+                                                    )
+                                                }
+                                            } else {
+                                                scope.launch { listDetailPaneNavigator.navigateBack() } 
+                                            }
+                                        },
                                         provideScaffold = false,
                                         topAppBarTitleText = stringResource(R.string.edit_item_title),
                                         navigateBack = { navController.popBackStack() }, 
@@ -153,7 +165,21 @@ fun ListTemplateApp(
             }
             BackHandler(enabled = isDetailPaneShowingContent) {
                 scope.launch {
-                    listDetailPaneNavigator.navigateBack()
+                    val currentKey = listDetailPaneNavigator.currentDestination?.contentKey
+                    when (currentKey) {
+                        is DetailPaneState.EditItem -> {
+                            listDetailPaneNavigator.navigateTo(
+                                ListDetailPaneScaffoldRole.Detail,
+                                DetailPaneState.ViewItem(currentKey.itemId)
+                            )
+                        }
+                        is DetailPaneState.ViewItem -> {
+                            listDetailPaneNavigator.navigateBack()
+                        }
+                        else -> {
+                            listDetailPaneNavigator.navigateBack()
+                        }
+                    }
                 }
             }
         }

@@ -32,35 +32,29 @@ object ItemEditDestination : NavigationDestination {
 @Composable
 fun ItemEditScreen(
     // Für Standalone-Navigation
-    navigateBack: () -> Unit, // Nach erfolgreichem Speichern im Standalone-Modus
-    onNavigateUp: () -> Unit,   // Für den Zurück-Pfeil in der TopAppBar im Standalone-Modus
-    modifier: Modifier = Modifier, // Modifier für die Wurzel-Composable dieses Screens
+    navigateBack: () -> Unit, 
+    onNavigateUp: () -> Unit,   
+    modifier: Modifier = Modifier, 
     // Für Hosting im Detail-Pane
-    itemIdFromPane: Int? = null, // ID des Items, das im Pane bearbeitet wird
-    onDoneEditingInPane: ((editedItemId: Int) -> Unit)? = null, // Callback für Pane: navigiert zu ViewItem(id)
+    itemIdFromPane: Int? = null, 
+    onDoneEditingInPane: ((editedItemId: Int) -> Unit)? = null, 
+    onNavigateBackInPane: (() -> Unit)? = null,
     viewModel: ItemEditViewModel = viewModel(factory = AppViewModelProvider.Factory),
-    provideScaffold: Boolean = true, // True für standalone, false für Detail-Pane
+    provideScaffold: Boolean = true, 
     topAppBarTitleText: String = stringResource(R.string.edit_item_title)
 ) {
     LaunchedEffect(itemIdFromPane) {
         if (itemIdFromPane != null && itemIdFromPane > 0) {
-            // ViewModel mit der ID aus dem Pane initialisieren.
-            // Das ViewModel sollte intern sicherstellen, dass es nicht unnötig neu lädt.
             viewModel.initializeWithItemId(itemIdFromPane)
         }
-        // Wenn itemIdFromPane null ist, wird erwartet, dass das ViewModel
-        // die itemId aus dem SavedStateHandle (NavArgs des Haupt-NavControllers) holt.
     }
 
     val coroutineScope = rememberCoroutineScope()
-
-    // Die ID des Items, das tatsächlich geladen und bearbeitet wird.
-    // Wichtig für die Rücknavigation nach dem Speichern im Pane-Modus.
     val actualLoadedItemId = viewModel.itemUiState.itemDetails.id
 
     if (provideScaffold) {
         Scaffold(
-            modifier = modifier, // ItemEditScreen-Modifier auf Scaffold anwenden
+            modifier = modifier, 
             topBar = {
                 TopAppBar(
                     title = topAppBarTitleText,
@@ -68,35 +62,43 @@ fun ItemEditScreen(
                     navigateUp = onNavigateUp // Für Standalone-Modus
                 )
             }
-        ) { innerPadding -> // Padding vom Scaffold
+        ) { innerPadding -> 
             ItemEntryBody(
                 itemUiState = viewModel.itemUiState,
                 onItemValueChange = viewModel::updateUiState,
                 onSaveClick = {
                     coroutineScope.launch {
-                        val success = viewModel.updateItem() // ViewModel sollte Erfolg zurückgeben
+                        val success = viewModel.updateItem()
                         if (success) {
-                            navigateBack() // Standalone-Modus: Zurück-Navigation
+                            navigateBack() 
                         }
                     }
                 },
                 onPhotoPickerSelect = viewModel::onPhotoPickerSelect,
-                modifier = Modifier // Eigener Modifier für ItemEntryBody
-                    .padding(innerPadding) // Padding vom Scaffold übernehmen
+                modifier = Modifier 
+                    .padding(innerPadding) 
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
             )
         }
     } else {
         // Im Detail-Pane: Eigene Column mit TopAppBar
-        Column(modifier = modifier.fillMaxSize()) { // ItemEditScreen-Modifier auf Column anwenden
+        Column(modifier = modifier.fillMaxSize()) { 
             TopAppBar(
                 title = topAppBarTitleText,
                 canNavigateBack = true,
                 navigateUp = {
-                    // Im Pane-Modus: Zurück zum ViewItem-Zustand des ursprünglich geöffneten Items
-                    if (itemIdFromPane != null && itemIdFromPane > 0) {
-                        onDoneEditingInPane?.invoke(itemIdFromPane)
+                    if (onNavigateBackInPane != null) {
+                        onNavigateBackInPane() //Bevorzugte Aktion für Pane
+                    } else {
+                        // Fallback (sollte nicht eintreten, wenn von ListTemplateApp korrekt versorgt)
+                        if (itemIdFromPane != null && itemIdFromPane > 0) {
+                            onDoneEditingInPane?.invoke(itemIdFromPane) 
+                        } else {
+                           // Im unwahrscheinlichen Fall, dass keine der Aktionen möglich ist.
+                           // Hier könnte man auch onNavigateUp() aus dem Standalone-Modus rufen, aber das
+                           // würde den globalen navController beeinflussen, was im Pane evtl. unerwünscht ist.
+                        }
                     }
                 }
             )
@@ -107,24 +109,19 @@ fun ItemEditScreen(
                     coroutineScope.launch {
                         val success = viewModel.updateItem()
                         if (success) {
-                            // Im Pane-Modus: Zurück zum ViewItem-Zustand des *bearbeiteten* Items
                             if (actualLoadedItemId > 0) {
                                 onDoneEditingInPane?.invoke(actualLoadedItemId)
                             } else {
                                 Log.e("ItemEditScreen", "Konnte nach dem Speichern im Pane nicht zurücknavigieren: Ungültige actualLoadedItemId.")
-                                // Fallback: Vielleicht zum ursprünglichen itemIdFromPane, wenn actualLoadedItemId ungültig
                                 if (itemIdFromPane != null && itemIdFromPane > 0) {
                                     onDoneEditingInPane?.invoke(itemIdFromPane)
-                                } else {
-                                     // Letzter Ausweg: Versuche, das Pane generell zurückzunavigieren (könnte zu Hidden führen)
-                                     // Diese Logik gehört aber eher in ListTemplateApp, wenn onDoneEditingInPane null ist oder fehlschlägt.
                                 }
                             }
                         }
                     }
                 },
                 onPhotoPickerSelect = viewModel::onPhotoPickerSelect,
-                modifier = Modifier // Eigener Modifier für ItemEntryBody
+                modifier = Modifier 
                     .padding(dimensionResource(id = R.dimen.padding_medium))
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
