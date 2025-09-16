@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.calculateEndPadding
-import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -74,22 +73,23 @@ object ItemDetailsDestination : NavigationDestination {
 @Composable
 fun ItemDetailsScreen(
     navigateToEditItem: (Int) -> Unit,
-    navigateBack: () -> Unit, // Für traditionelle Navigation oder wenn Scaffold selbst bereitgestellt wird
+    navigateBack: () -> Unit,
     modifier: Modifier = Modifier,
-    itemIdFromNavArgs: Int?,      // Für direkte Navigation zum Screen
-    selectedItemIdFromParent: Int? = null, // Von List-Detail Parent injiziert
-    onClosePane: (() -> Unit)? = null,      // Callback zum Schließen des Panes, von List-Detail Parent injiziert
+    itemIdFromNavArgs: Int?,
+    selectedItemIdFromParent: Int? = null,
+    onClosePane: (() -> Unit)? = null,
     viewModel: ItemDetailsViewModel = viewModel(factory = AppViewModelProvider.Factory),
-    provideScaffold: Boolean = true, // false, wenn in List-Detail gehostet
+    provideScaffold: Boolean = true,
     topAppBarTitle: String = stringResource(ItemDetailsDestination.titleRes)
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val coroutineScope = rememberCoroutineScope()
     var showDeleteFailedDialog by rememberSaveable { mutableStateOf(false) }
 
+    val actualTopAppBarTitle = uiState.itemDetails?.name ?: topAppBarTitle
+
     LaunchedEffect(key1 = selectedItemIdFromParent, key2 = itemIdFromNavArgs) {
         val itemIdToLoad = selectedItemIdFromParent ?: itemIdFromNavArgs
-
         if (itemIdToLoad != null && itemIdToLoad > 0) {
             viewModel.loadItemDetailsForId(itemIdToLoad)
         } else {
@@ -97,8 +97,12 @@ fun ItemDetailsScreen(
         }
     }
 
-    val screenContent = @Composable { paddingValuesFromParentScaffold: PaddingValues ->
-        Box(modifier = modifier.fillMaxSize()) {
+    val screenContent = @Composable { paddingValuesFromParent: PaddingValues ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValuesFromParent)
+        ) {
             ItemDetailsBody(
                 itemDetailsUiState = uiState,
                 onDelete = {
@@ -112,21 +116,12 @@ fun ItemDetailsScreen(
                 },
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(
-                        start = paddingValuesFromParentScaffold.calculateStartPadding(
-                            LocalLayoutDirection.current
-                        ),
-                        end = paddingValuesFromParentScaffold.calculateEndPadding(
-                            LocalLayoutDirection.current
-                        ),
-                        top = paddingValuesFromParentScaffold.calculateTopPadding()
-                    )
                     .verticalScroll(rememberScrollState())
             )
             FloatingActionButton(
                 onClick = {
-                    val idForEdit = selectedItemIdFromParent ?: (uiState.itemDetails?.id ?: 0) // Fallback für Standalone-Modus
-                    if (idForEdit > 0) { // Nur navigieren, wenn die ID gültig ist
+                    val idForEdit = selectedItemIdFromParent ?: (uiState.itemDetails?.id ?: 0)
+                    if (idForEdit > 0) {
                         navigateToEditItem(idForEdit)
                     } else {
                         Log.e("ItemDetailsScreen", "Attempted to navigate to edit with invalid ID: $idForEdit")
@@ -160,18 +155,26 @@ fun ItemDetailsScreen(
         Scaffold(
             topBar = {
                 TopAppBar(
-                    title = topAppBarTitle,
+                    title = actualTopAppBarTitle,
                     canNavigateBack = true,
-                    navigateUp = navigateBack // Im Standalone-Modus ist navigateUp = navigateBack
+                    navigateUp = navigateBack
                 )
             }
         ) { innerPadding ->
             screenContent(innerPadding)
         }
     } else {
-        screenContent(PaddingValues(0.dp))
+        Column(modifier = modifier.fillMaxSize()) {
+            TopAppBar(
+                title = actualTopAppBarTitle,
+                canNavigateBack = true,
+                navigateUp = { onClosePane?.invoke() ?: navigateBack() }
+            )
+            screenContent(PaddingValues(0.dp))
+        }
     }
 }
+
 
 @Composable
 private fun ItemDetailsBody(
@@ -192,8 +195,7 @@ private fun ItemDetailsBody(
                 modifier = Modifier.fillMaxWidth()
             )
         } else {
-            Text("Item konnte nicht geladen werden.")
-             // TODO: Text(stringResource(R.string.item_details_empty)) Zeige Text wenn kein Item geladen
+            Text("") //TODO stringResource(R.string.item_details_empty)) Fallback-Text, falls kein Item geladen
         }
         if (itemDetails != null) {
             OutlinedButton(
@@ -238,7 +240,7 @@ fun ItemDetails(
             verticalArrangement = Arrangement.spacedBy(
                 dimensionResource(id = R.dimen.padding_medium)
             ),
-            horizontalAlignment = Alignment.CenterHorizontally // Zentriert Kinder horizontal
+            horizontalAlignment = Alignment.CenterHorizontally 
         ) {
             ItemDetailsRow(
                 itemDetail = item.name,
@@ -260,18 +262,17 @@ fun ItemDetails(
                         })
                         .build(),
                     contentDescription = "selected image",
-                    contentScale = ContentScale.Fit, // Stellt sicher, dass das Bild skaliert wird, um hinein zu passen
+                    contentScale = ContentScale.Fit, 
                     modifier = Modifier
-                        .fillMaxWidth(0.75f) // Nimmt maximal 75% der Breite des Elternelements ein
+                        .fillMaxWidth(0.75f) 
                         .padding(vertical = dimensionResource(id = R.dimen.padding_small))
-                        // .align(Alignment.CenterHorizontally) ist nicht mehr nötig, da die Column es zentriert
                 )
             } else {
                 Image(
                     painter = painter,
                     contentDescription = "default image",
                     modifier = Modifier
-                        .fillMaxWidth(fraction = 0.4f) // Beibehaltung der ursprünglichen Größe für das Default-Bild
+                        .fillMaxWidth(fraction = 0.4f) 
                         .aspectRatio(1f)
                         .padding(
                             horizontal = dimensionResource(

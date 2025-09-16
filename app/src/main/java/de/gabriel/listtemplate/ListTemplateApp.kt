@@ -2,6 +2,11 @@ package de.gabriel.listtemplate
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.layout.AnimatedPane
@@ -10,7 +15,9 @@ import androidx.compose.material3.adaptive.navigation.NavigableListDetailPaneSca
 import androidx.compose.material3.adaptive.navigation.rememberListDetailPaneScaffoldNavigator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -19,6 +26,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import de.gabriel.listtemplate.ui.HomeDestination
 import de.gabriel.listtemplate.ui.HomeScreen
+import de.gabriel.listtemplate.ui.common.TopAppBar
 import de.gabriel.listtemplate.ui.item.ItemDetailsDestination
 import de.gabriel.listtemplate.ui.item.ItemDetailsScreen
 import de.gabriel.listtemplate.ui.item.ItemEditDestination
@@ -27,7 +35,7 @@ import de.gabriel.listtemplate.ui.item.ItemEntryDestination
 import de.gabriel.listtemplate.ui.item.ItemEntryScreen
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3AdaptiveApi::class)
+@OptIn(ExperimentalMaterial3AdaptiveApi::class, ExperimentalMaterial3Api::class) 
 @Composable
 fun ListTemplateApp(
     modifier: Modifier = Modifier
@@ -39,25 +47,31 @@ fun ListTemplateApp(
     NavHost(navController = navController, startDestination = HomeDestination.route) {
         composable(HomeDestination.route) {
             NavigableListDetailPaneScaffold<Int?>(
-                modifier = modifier, // Modifier für den Scaffold selbst
+                modifier = modifier, 
                 navigator = listDetailPaneNavigator,
                 listPane = {
                     AnimatedPane(modifier = Modifier) {
-                        HomeScreen(
-                            navigateToItemEntry = {
-                                navController.navigate(ItemEntryDestination.route)
-                            },
-                            onItemClick = { itemId ->
-                                scope.launch {
-                                    listDetailPaneNavigator.navigateTo(ListDetailPaneScaffoldRole.Detail, itemId)
-                                }
-                            },
-                            provideScaffold = false
-                        )
+                        Column {
+                            TopAppBar(
+                                title = "Items", 
+                                canNavigateBack = false
+                            )
+                            HomeScreen(
+                                navigateToItemEntry = {
+                                    navController.navigate(ItemEntryDestination.route)
+                                },
+                                onItemClick = { itemId ->
+                                    scope.launch {
+                                        listDetailPaneNavigator.navigateTo(ListDetailPaneScaffoldRole.Detail, itemId)
+                                    }
+                                },
+                                provideScaffold = false
+                            )
+                        }
                     }
                 },
                 detailPane = {
-                    AnimatedPane(modifier = Modifier) {
+                    AnimatedPane(modifier = Modifier.fillMaxSize()) {
                         AnimatedContent(
                             targetState = listDetailPaneNavigator.currentDestination?.contentKey,
                             label = "DetailPaneAnimation"
@@ -80,10 +94,22 @@ fun ListTemplateApp(
                                     },
                                     provideScaffold = false,
                                     itemIdFromNavArgs = null
-                                    // Der Modifier wird hier nicht benötigt, da AnimatedPane den Modifier bereits hat
                                 )
                             } else {
-                                Text(text = "Select an item to view its details.")
+                                Column(modifier = Modifier.fillMaxSize()) {
+                                    TopAppBar(
+                                        title = "Details",
+                                        canNavigateBack = false
+                                    )
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .padding(16.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(text = "Select an item to view its details.")
+                                    }
+                                }
                             }
                         }
                     }
@@ -103,7 +129,6 @@ fun ListTemplateApp(
             )
         }
 
-        // Standalone-Route für ItemDetailsScreen (z.B. für schmale Bildschirme oder direkte Links)
         composable(
             route = ItemDetailsDestination.routeWithArgs,
             arguments = listOf(navArgument(ItemDetailsDestination.ITEM_ID_ARG) {
@@ -114,7 +139,7 @@ fun ListTemplateApp(
             ItemDetailsScreen(
                 itemIdFromNavArgs = itemId,
                 selectedItemIdFromParent = null,
-                onClosePane = null, // Kein Pane zum Schließen im Standalone-Modus
+                onClosePane = null, 
                 navigateToEditItem = { currentItemId ->
                     navController.navigate("${ItemEditDestination.route}/$currentItemId")
                 },
