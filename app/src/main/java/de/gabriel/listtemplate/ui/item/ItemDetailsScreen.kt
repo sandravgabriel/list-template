@@ -194,8 +194,6 @@ private fun ItemDetailsBody(
                 item = itemDetails.toItem(),
                 modifier = Modifier.fillMaxWidth()
             )
-        } else {
-            Text("") //TODO stringResource(R.string.item_details_empty)) Fallback-Text, falls kein Item geladen
         }
         if (itemDetails != null) {
             OutlinedButton(
@@ -240,17 +238,7 @@ fun ItemDetails(
             verticalArrangement = Arrangement.spacedBy(
                 dimensionResource(id = R.dimen.padding_medium)
             ),
-            horizontalAlignment = Alignment.CenterHorizontally 
         ) {
-            ItemDetailsRow(
-                itemDetail = item.name,
-                modifier = Modifier.padding(
-                    horizontal = dimensionResource(
-                        id = R.dimen
-                            .padding_medium
-                    )
-                ),
-            )
             if (userImageAvailable) {
                 AsyncImage(
                     model = ImageRequest.Builder(LocalContext.current)
@@ -266,6 +254,8 @@ fun ItemDetails(
                     modifier = Modifier
                         .fillMaxWidth(0.75f) 
                         .padding(vertical = dimensionResource(id = R.dimen.padding_small))
+                        .align(Alignment.CenterHorizontally),
+
                 )
             } else {
                 Image(
@@ -284,6 +274,15 @@ fun ItemDetails(
                     colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.secondary),
                 )
             }
+            ItemDetailsRow(
+                itemDetail = item.name,
+                modifier = Modifier.padding(
+                    horizontal = dimensionResource(
+                        id = R.dimen
+                            .padding_medium
+                    )
+                ),
+            )
         }
     }
 }

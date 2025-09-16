@@ -75,7 +75,7 @@ fun ListTemplateAppContent(
                         // Fall 2: Bearbeitungsmodus (nur wenn ein gültiges Item ausgewählt ist)
                         detailScreenMode == DetailScreenMode.EDIT && itemId != null -> {
                             ItemEditScreen(
-                                selectedItemId = itemId,
+                                // selectedItemId = itemId,
                                 provideScaffold = false,
                                 modifier = Modifier.padding(receivedPaddingValues),
                                 // Wenn Bearbeitung fertig oder abgebrochen -> zurück zur Detailansicht

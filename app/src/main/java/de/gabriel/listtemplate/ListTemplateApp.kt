@@ -2,7 +2,6 @@ package de.gabriel.listtemplate
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -17,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -33,27 +33,28 @@ import de.gabriel.listtemplate.ui.item.ItemEditDestination
 import de.gabriel.listtemplate.ui.item.ItemEditScreen
 import de.gabriel.listtemplate.ui.item.ItemEntryDestination
 import de.gabriel.listtemplate.ui.item.ItemEntryScreen
+import de.gabriel.listtemplate.ui.navigation.DetailPaneState
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3AdaptiveApi::class, ExperimentalMaterial3Api::class) 
+@OptIn(ExperimentalMaterial3AdaptiveApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun ListTemplateApp(
     modifier: Modifier = Modifier
 ) {
     val navController: NavHostController = rememberNavController()
-    val listDetailPaneNavigator = rememberListDetailPaneScaffoldNavigator<Int?>()
+    val listDetailPaneNavigator = rememberListDetailPaneScaffoldNavigator<DetailPaneState>()
     val scope = rememberCoroutineScope()
 
     NavHost(navController = navController, startDestination = HomeDestination.route) {
         composable(HomeDestination.route) {
-            NavigableListDetailPaneScaffold<Int?>(
-                modifier = modifier, 
+            NavigableListDetailPaneScaffold<DetailPaneState>(
+                modifier = modifier,
                 navigator = listDetailPaneNavigator,
                 listPane = {
                     AnimatedPane(modifier = Modifier) {
                         Column {
                             TopAppBar(
-                                title = "Items", 
+                                title = "Items",
                                 canNavigateBack = false
                             )
                             HomeScreen(
@@ -62,7 +63,10 @@ fun ListTemplateApp(
                                 },
                                 onItemClick = { itemId ->
                                     scope.launch {
-                                        listDetailPaneNavigator.navigateTo(ListDetailPaneScaffoldRole.Detail, itemId)
+                                        listDetailPaneNavigator.navigateTo(
+                                            ListDetailPaneScaffoldRole.Detail,
+                                            DetailPaneState.ViewItem(itemId)
+                                        )
                                     }
                                 },
                                 provideScaffold = false
@@ -75,39 +79,64 @@ fun ListTemplateApp(
                         AnimatedContent(
                             targetState = listDetailPaneNavigator.currentDestination?.contentKey,
                             label = "DetailPaneAnimation"
-                        ) { selectedItemId: Int? ->
-                            if (selectedItemId != null) {
-                                ItemDetailsScreen(
-                                    selectedItemIdFromParent = selectedItemId,
-                                    onClosePane = {
-                                        scope.launch {
-                                            listDetailPaneNavigator.navigateBack()
-                                        }
-                                    },
-                                    navigateToEditItem = { itemId ->
-                                        navController.navigate("${ItemEditDestination.route}/$itemId")
-                                    },
-                                    navigateBack = {
-                                        scope.launch {
-                                            listDetailPaneNavigator.navigateBack()
-                                        }
-                                    },
-                                    provideScaffold = false,
-                                    itemIdFromNavArgs = null
-                                )
-                            } else {
-                                Column(modifier = Modifier.fillMaxSize()) {
-                                    TopAppBar(
-                                        title = "Details",
-                                        canNavigateBack = false
+                        ) { currentPaneState: DetailPaneState? ->
+                            when (currentPaneState) {
+                                is DetailPaneState.ViewItem -> {
+                                    ItemDetailsScreen(
+                                        selectedItemIdFromParent = currentPaneState.itemId,
+                                        onClosePane = { 
+                                            scope.launch {
+                                                listDetailPaneNavigator.navigateBack()
+                                            }
+                                        },
+                                        navigateToEditItem = { itemId -> 
+                                            scope.launch {
+                                                listDetailPaneNavigator.navigateTo(
+                                                    ListDetailPaneScaffoldRole.Detail,
+                                                    DetailPaneState.EditItem(itemId)
+                                                )
+                                            }
+                                        },
+                                        navigateBack = { 
+                                            scope.launch {
+                                                listDetailPaneNavigator.navigateBack()
+                                            }
+                                        },
+                                        provideScaffold = false,
+                                        itemIdFromNavArgs = null
                                     )
-                                    Box(
-                                        modifier = Modifier
-                                            .fillMaxSize()
-                                            .padding(16.dp),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Text(text = "Select an item to view its details.")
+                                }
+                                is DetailPaneState.EditItem -> {
+                                    ItemEditScreen(
+                                        itemIdFromPane = currentPaneState.itemId,
+                                        onDoneEditingInPane = { editedItemId ->
+                                            scope.launch {
+                                                listDetailPaneNavigator.navigateTo(
+                                                    ListDetailPaneScaffoldRole.Detail,
+                                                    DetailPaneState.ViewItem(editedItemId)
+                                                )
+                                            }
+                                        },
+                                        provideScaffold = false,
+                                        topAppBarTitleText = stringResource(R.string.edit_item_title),
+                                        navigateBack = { navController.popBackStack() },
+                                        onNavigateUp = { navController.navigateUp() }
+                                    )
+                                }
+                                is DetailPaneState.Hidden, null -> {
+                                    Column(modifier = Modifier.fillMaxSize()) {
+                                        TopAppBar(
+                                            title = "Details",
+                                            canNavigateBack = false
+                                        )
+                                        androidx.compose.foundation.layout.Box(
+                                            modifier = Modifier
+                                                .fillMaxSize()
+                                                .padding(16.dp),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Text(text = "Select an item to view its details.")
+                                        }
                                     }
                                 }
                             }
@@ -154,9 +183,12 @@ fun ListTemplateApp(
                 type = NavType.IntType
             })
         ) {
+            // Standalone-Aufruf von ItemEditScreen
             ItemEditScreen(
                 navigateBack = { navController.popBackStack() },
-                onNavigateUp = { navController.navigateUp() }
+                onNavigateUp = { navController.navigateUp() },
+                // itemIdFromPane und onDoneEditingInPane bleiben null (Standardwerte)
+                provideScaffold = true // Eigener Scaffold im Standalone-Modus
             )
         }
     }
