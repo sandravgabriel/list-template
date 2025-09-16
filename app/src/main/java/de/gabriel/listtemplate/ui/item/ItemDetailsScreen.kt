@@ -1,6 +1,5 @@
 package de.gabriel.listtemplate.ui.item
 
-import android.app.Activity
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -12,7 +11,6 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.calculateEndPadding
-import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -33,8 +31,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
-import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -46,6 +42,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.dimensionResource
@@ -80,26 +77,19 @@ fun ItemDetailsScreen(
     modifier: Modifier = Modifier,
     itemIdFromNavArgs: Int?,
     selectedItemIdFromParent: Int? = null,
+    onClosePane: (() -> Unit)? = null,
     viewModel: ItemDetailsViewModel = viewModel(factory = AppViewModelProvider.Factory),
     provideScaffold: Boolean = true,
     topAppBarTitle: String = stringResource(ItemDetailsDestination.titleRes)
 ) {
-    val context = LocalContext.current
-    val activity = context as Activity
-    val windowSizeClass = calculateWindowSizeClass(activity)
-    val currentScreenWidthClass = windowSizeClass.widthSizeClass
     val uiState by viewModel.uiState.collectAsState()
     val coroutineScope = rememberCoroutineScope()
     var showDeleteFailedDialog by rememberSaveable { mutableStateOf(false) }
 
-    // Dieser LaunchedEffect reagiert, wenn selectedItemIdFromParent sich ändert
-    LaunchedEffect(key1 = itemIdFromNavArgs, key2 = selectedItemIdFromParent, key3 = currentScreenWidthClass) {
-        val itemIdToLoad = if (currentScreenWidthClass == WindowWidthSizeClass.Expanded) {
-            selectedItemIdFromParent
-        } else {
-            itemIdFromNavArgs
-        }
+    val actualTopAppBarTitle = uiState.itemDetails?.name ?: topAppBarTitle
 
+    LaunchedEffect(key1 = selectedItemIdFromParent, key2 = itemIdFromNavArgs) {
+        val itemIdToLoad = selectedItemIdFromParent ?: itemIdFromNavArgs
         if (itemIdToLoad != null && itemIdToLoad > 0) {
             viewModel.loadItemDetailsForId(itemIdToLoad)
         } else {
@@ -107,14 +97,18 @@ fun ItemDetailsScreen(
         }
     }
 
-    val screenContent = @Composable { paddingValuesFromParentScaffold: PaddingValues ->
-        Box(modifier = modifier.fillMaxSize()) {
+    val screenContent = @Composable { paddingValuesFromParent: PaddingValues ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValuesFromParent)
+        ) {
             ItemDetailsBody(
                 itemDetailsUiState = uiState,
                 onDelete = {
                     coroutineScope.launch {
                         if (viewModel.deleteItem()) {
-                            navigateBack()
+                            onClosePane?.invoke() ?: navigateBack()
                         } else {
                             showDeleteFailedDialog = true
                         }
@@ -122,31 +116,14 @@ fun ItemDetailsScreen(
                 },
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(
-                        start = paddingValuesFromParentScaffold.calculateStartPadding(
-                            LocalLayoutDirection.current
-                        ),
-                        end = paddingValuesFromParentScaffold.calculateEndPadding(
-                            LocalLayoutDirection.current
-                        ),
-                        top = paddingValuesFromParentScaffold.calculateTopPadding()
-                    )
                     .verticalScroll(rememberScrollState())
             )
             FloatingActionButton(
                 onClick = {
-                    val idForEdit: Int = if (currentScreenWidthClass == WindowWidthSizeClass.Expanded) {
-                        // Im Expanded-Modus, verwende selectedItemIdFromParent, aber mit Vorsicht
-                        selectedItemIdFromParent ?: 0 // oder eine bessere Fehlerbehandlung
-                    } else {
-                        // Im Compact-Modus, verwende die ID aus dem itemDetails des ViewModels
-                        uiState.itemDetails?.id ?: 0
-                    }
-
-                    if (idForEdit > 0) { // Nur navigieren, wenn die ID gültig ist
+                    val idForEdit = selectedItemIdFromParent ?: (uiState.itemDetails?.id ?: 0)
+                    if (idForEdit > 0) {
                         navigateToEditItem(idForEdit)
                     } else {
-                        // Logge einen Fehler oder zeige eine Meldung, dass die ID ungültig ist
                         Log.e("ItemDetailsScreen", "Attempted to navigate to edit with invalid ID: $idForEdit")
                     }
                 },
@@ -178,7 +155,7 @@ fun ItemDetailsScreen(
         Scaffold(
             topBar = {
                 TopAppBar(
-                    title = topAppBarTitle,
+                    title = actualTopAppBarTitle,
                     canNavigateBack = true,
                     navigateUp = navigateBack
                 )
@@ -187,9 +164,17 @@ fun ItemDetailsScreen(
             screenContent(innerPadding)
         }
     } else {
-        screenContent(PaddingValues(0.dp))
+        Column(modifier = modifier.fillMaxSize()) {
+            TopAppBar(
+                title = actualTopAppBarTitle,
+                canNavigateBack = true,
+                navigateUp = { onClosePane?.invoke() ?: navigateBack() }
+            )
+            screenContent(PaddingValues(0.dp))
+        }
     }
 }
+
 
 @Composable
 private fun ItemDetailsBody(
@@ -209,16 +194,15 @@ private fun ItemDetailsBody(
                 item = itemDetails.toItem(),
                 modifier = Modifier.fillMaxWidth()
             )
-        } else {
-            // Optional: Zeige einen Ladeindikator oder nichts, da die Navigation bald stattfinden sollte.
-            // Text("Item wird geladen oder ist nicht verfügbar...")
         }
-        OutlinedButton(
-            onClick = { deleteConfirmationRequired = true },
-            shape = MaterialTheme.shapes.small,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(stringResource(R.string.delete))
+        if (itemDetails != null) {
+            OutlinedButton(
+                onClick = { deleteConfirmationRequired = true },
+                shape = MaterialTheme.shapes.small,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(stringResource(R.string.delete))
+            }
         }
         if (deleteConfirmationRequired) {
             DeleteConfirmationDialog(
@@ -253,17 +237,8 @@ fun ItemDetails(
                 .padding(dimensionResource(id = R.dimen.padding_medium)),
             verticalArrangement = Arrangement.spacedBy(
                 dimensionResource(id = R.dimen.padding_medium)
-            )
+            ),
         ) {
-            ItemDetailsRow(
-                itemDetail = item.name,
-                modifier = Modifier.padding(
-                    horizontal = dimensionResource(
-                        id = R.dimen
-                            .padding_medium
-                    )
-                ),
-            )
             if (userImageAvailable) {
                 AsyncImage(
                     model = ImageRequest.Builder(LocalContext.current)
@@ -275,15 +250,19 @@ fun ItemDetails(
                         })
                         .build(),
                     contentDescription = "selected image",
+                    contentScale = ContentScale.Fit, 
                     modifier = Modifier
+                        .fillMaxWidth(0.75f) 
                         .padding(vertical = dimensionResource(id = R.dimen.padding_small))
+                        .align(Alignment.CenterHorizontally),
+
                 )
             } else {
                 Image(
                     painter = painter,
                     contentDescription = "default image",
                     modifier = Modifier
-                        .fillMaxWidth(fraction = 0.4f)
+                        .fillMaxWidth(fraction = 0.4f) 
                         .aspectRatio(1f)
                         .padding(
                             horizontal = dimensionResource(
@@ -295,6 +274,15 @@ fun ItemDetails(
                     colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.secondary),
                 )
             }
+            ItemDetailsRow(
+                itemDetail = item.name,
+                modifier = Modifier.padding(
+                    horizontal = dimensionResource(
+                        id = R.dimen
+                            .padding_medium
+                    )
+                ),
+            )
         }
     }
 }

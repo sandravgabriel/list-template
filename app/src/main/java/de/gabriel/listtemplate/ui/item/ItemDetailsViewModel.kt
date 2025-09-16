@@ -18,10 +18,8 @@ class ItemDetailsViewModel(
     private val photoSaver: PhotoSaverRepository
 ) : ViewModel() {
 
-    private val _currentDisplayItemId = MutableStateFlow<Int?>(null) // Interne StateFlow für die ID
+    private val _currentDisplayItemId = MutableStateFlow<Int?>(null)
 
-    // Diese Methode wird vom ItemDetailsScreen (via LaunchedEffect) aufgerufen,
-    // wenn sich selectedItemIdFromParent ändert.
     fun loadItemDetailsForId(itemId: Int?) {
         _currentDisplayItemId.value = itemId
     }

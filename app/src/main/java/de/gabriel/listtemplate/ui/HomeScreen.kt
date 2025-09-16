@@ -75,7 +75,6 @@ fun HomeScreen(
 ) {
     val homeUiState by viewModel.homeUiState.collectAsState()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
-
     val screenContent = @Composable { paddingValuesFromParentScaffold: PaddingValues ->
         Box(modifier = modifier.fillMaxSize()) {
             HomeBody(

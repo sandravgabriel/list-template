@@ -1,4 +1,4 @@
-package de.gabriel.listtemplate.ui.adaptive
+package de.gabriel.listtemplate.ui.baseadaptive
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,14 +10,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavHostController
-import de.gabriel.listtemplate.DetailScreenMode
-import de.gabriel.listtemplate.ENTRY_ITEM_ID
 import de.gabriel.listtemplate.R
 import de.gabriel.listtemplate.ui.HomeScreen
 import de.gabriel.listtemplate.ui.item.ItemDetailsScreen
 import de.gabriel.listtemplate.ui.item.ItemEditScreen
 import de.gabriel.listtemplate.ui.item.ItemEntryScreen
-import de.gabriel.listtemplate.ui.navigation.ListTemplateNavHost
+import de.gabriel.listtemplate.ui.baseadaptive.ListTemplateNavHost
 
 @Composable
 fun ListTemplateAppContent(
@@ -77,7 +75,7 @@ fun ListTemplateAppContent(
                         // Fall 2: Bearbeitungsmodus (nur wenn ein gültiges Item ausgewählt ist)
                         detailScreenMode == DetailScreenMode.EDIT && itemId != null -> {
                             ItemEditScreen(
-                                selectedItemId = itemId,
+                                // selectedItemId = itemId,
                                 provideScaffold = false,
                                 modifier = Modifier.padding(receivedPaddingValues),
                                 // Wenn Bearbeitung fertig oder abgebrochen -> zurück zur Detailansicht

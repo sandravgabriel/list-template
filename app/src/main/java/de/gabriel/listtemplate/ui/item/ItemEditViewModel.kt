@@ -24,50 +24,47 @@ class ItemEditViewModel(
     var itemUiState by mutableStateOf(ItemUiState())
         private set
 
-    private var currentItemId: Int? = null
+    private var currentItemId: Int? = null // Hält die ID des zu bearbeitenden Items
 
     init {
-        // Versuch, die ID aus NavArgs zu laden (typisch für Compact-Modus)
         val navArgItemId: Int? = savedStateHandle[ItemEditDestination.ITEM_ID_ARG]
-        if (navArgItemId != null) {
+        if (navArgItemId != null && navArgItemId > 0) { // Stelle sicher, dass die ID gültig ist
             initializeWithItemId(navArgItemId)
         } else {
-            // Wenn navArgItemId null ist, warten wir möglicherweise auf einen expliziten Aufruf
-            // von initializeWithItemId() (z.B. aus dem Screen im Expanded-Modus).
-
-            // Was passiert, wenn navArgItemId null oder 0 ist?
-            // Hier könntest du einen Fehler loggen oder einen Default-Zustand setzen.
-            // Wenn du hier nichts tust, wird initializeWithItemId vielleicht gar nicht
-            // mit einer gültigen ID aufgerufen, oder mit 0, falls das der Default ist.
-            Log.e("ItemEditViewModel", "Invalid itemId from NavArgs: $navArgItemId")
-            // Ggf. itemUiState auf einen Fehler- oder Leerzustand setzen.
+            // Wenn keine gültige ID aus NavArgs kommt, wird das ViewModel möglicherweise
+            // später durch einen direkten Aufruf von initializeWithItemId() (z.B. vom Pane)
+            // initialisiert. Wenn nicht, bleibt der itemUiState leer/ungültig.
+            Log.d("ItemEditViewModel", "Keine gültige itemId in NavArgs beim Start.")
         }
     }
 
     fun initializeWithItemId(itemId: Int) {
+        // Verhindere Neuladen, wenn bereits mit derselben ID initialisiert und Daten scheinbar geladen sind.
         if (this.currentItemId == itemId && itemUiState.itemDetails.id == itemId && itemUiState.itemDetails.name.isNotBlank()) {
-            // Bereits mit dieser ID initialisiert und Daten scheinen geladen
+            Log.d("ItemEditViewModel", "Bereits mit itemId $itemId initialisiert und Daten vorhanden.")
             return
         }
         this.currentItemId = itemId
+        Log.d("ItemEditViewModel", "Initialisiere mit itemId: $itemId")
 
         viewModelScope.launch {
+            // Lade das Item mit der neuen ID
             val loadedItemEntity = itemsRepository.getItemWithFile(itemId, photoSaver.photoFolder)
                 .filterNotNull()
                 .firstOrNull()
 
             if (loadedItemEntity != null) {
                 val initialItemDetails = loadedItemEntity.toItemDetails()
-
                 itemUiState = ItemUiState(
                     itemDetails = initialItemDetails,
-                    isEntryValid = validateInput(initialItemDetails), // Validiere mit den geladenen Details
-                    localPickerPhoto = null //WICHTIG: Explizit auf null setzen für ein bestehendes Item
+                    isEntryValid = validateInput(initialItemDetails),
+                    localPickerPhoto = null // Wichtig: Für ein bestehendes Item explizit zurücksetzen
                 )
+                Log.d("ItemEditViewModel", "Item $itemId geladen: ${initialItemDetails.name}")
             } else {
-                // Fehlerbehandlung: z.B. itemUiState auf einen Fehlerzustand setzen oder eine Meldung anzeigen
-                // idealerweise sollte der Nutzer informiert werden.
-                itemUiState = ItemUiState(isEntryValid = false) // Beispiel für einen leeren/ungültigen Zustand
+                Log.e("ItemEditViewModel", "Konnte Item mit ID $itemId nicht laden.")
+                itemUiState = ItemUiState(isEntryValid = false) // Setze auf leeren/ungültigen Zustand
+                currentItemId = null // Setze currentItemId zurück, da das Laden fehlschlug
             }
         }
     }
@@ -92,42 +89,46 @@ class ItemEditViewModel(
                 itemUiState = itemUiState.copy(localPickerPhoto = photo)
             }
         } else {
-            // Was passiert, wenn die Auswahl abgebrochen wird oder kein Foto gewählt wird?
             itemUiState = itemUiState.copy(localPickerPhoto = null)
         }
     }
 
-    suspend fun updateItem() {
-        if (validateInput(itemUiState.itemDetails) && currentItemId != null) {
-            val fileToSaveWithItem: File?
-            if (itemUiState.localPickerPhoto != null) {
-                // ... (Logik für neues Bild speichern) ...
-                val newSavedFile = photoSaver.savePhoto()
-                fileToSaveWithItem =
-                    newSavedFile
-                        ?: itemUiState.itemDetails.savedPhoto // Fehler beim Speichern, altes Bild
-            } else {
-                fileToSaveWithItem =
-                    itemUiState.itemDetails.savedPhoto // Kein neues Bild, altes Bild
-            }
-
-            val detailsForUpdate =
-                itemUiState.itemDetails.copy(
-                    id = currentItemId!!,
-                    savedPhoto = fileToSaveWithItem
-                )
-
-            // Aktualisiere itemUiState nochmal, damit auch der Screen ggf. den finalen savedPhoto-Status reflektiert
-            // und localPickerPhoto zurückgesetzt wird, FALLS ein neues Bild gespeichert wurde.
-            itemUiState = itemUiState.copy(
-                itemDetails = detailsForUpdate,
-                localPickerPhoto = if (itemUiState.localPickerPhoto != null && fileToSaveWithItem != itemUiState.itemDetails.savedPhoto) null else itemUiState.localPickerPhoto
-                // Setze localPickerPhoto nur zurück, wenn es gesetzt war UND ein neues Bild erfolgreich gespeichert wurde
-                // (erkennbar daran, dass fileToSaveWithItem sich von dem alten itemUiState.itemDetails.savedPhoto unterscheidet)
-            )
-
-            // Jetzt das Repository mit den finalen `detailsForUpdate` aufrufen
-            itemsRepository.updateItem(detailsForUpdate.toItem().toItemEntry())
+    // Gibt true zurück, wenn die Aktualisierung erfolgreich angestoßen wurde, sonst false.
+    suspend fun updateItem(): Boolean {
+        if (!validateInput(itemUiState.itemDetails)) {
+            Log.w("ItemEditViewModel", "Validierung für Update fehlgeschlagen.")
+            return false
         }
+        val currentId = this.currentItemId // Lokale Kopie für Null-Sicherheit
+        if (currentId == null) {
+            Log.e("ItemEditViewModel", "Update fehlgeschlagen: currentItemId ist null.")
+            return false
+        }
+
+        val fileToSaveWithItem: File?
+        if (itemUiState.localPickerPhoto != null) {
+            val newSavedFile = photoSaver.savePhoto()
+            fileToSaveWithItem = newSavedFile ?: itemUiState.itemDetails.savedPhoto
+            if (newSavedFile == null) {
+                Log.w("ItemEditViewModel", "Neues Foto konnte nicht gespeichert werden, verwende altes Foto.")
+            }
+        } else {
+            fileToSaveWithItem = itemUiState.itemDetails.savedPhoto
+        }
+
+        val detailsForUpdate = itemUiState.itemDetails.copy(
+            id = currentId, // Stelle sicher, dass die korrekte ID verwendet wird
+            savedPhoto = fileToSaveWithItem
+        )
+
+        // Aktualisiere itemUiState, um localPickerPhoto ggf. zurückzusetzen
+        itemUiState = itemUiState.copy(
+            itemDetails = detailsForUpdate,
+            localPickerPhoto = if (itemUiState.localPickerPhoto != null && fileToSaveWithItem != itemUiState.itemDetails.savedPhoto) null else itemUiState.localPickerPhoto
+        )
+
+        itemsRepository.updateItem(detailsForUpdate.toItem().toItemEntry())
+        Log.d("ItemEditViewModel", "Item ${detailsForUpdate.id} Aktualisierung angestoßen.")
+        return true
     }
 }

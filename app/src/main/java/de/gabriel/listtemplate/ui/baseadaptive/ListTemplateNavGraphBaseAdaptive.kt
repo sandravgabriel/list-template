@@ -1,4 +1,4 @@
-package de.gabriel.listtemplate.ui.navigation
+package de.gabriel.listtemplate.ui.baseadaptive
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier

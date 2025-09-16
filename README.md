@@ -1,7 +1,7 @@
 # List Template: Android App Template
 
-[![Kotlin Version](https://img.shields.io/badge/Kotlin-2.2.10-blue.svg)](https://kotlinlang.org)
-[![Jetpack Compose](https://img.shields.io/badge/Jetpack%20Compose-2025.08.00-brightgreen.svg)](https://developer.android.com/jetpack/compose)
+[![Kotlin Version](https://img.shields.io/badge/Kotlin-2.2.20-blue.svg)](https://kotlinlang.org)
+[![Jetpack Compose](https://img.shields.io/badge/Jetpack%20Compose-2025.09.00-brightgreen.svg)](https://developer.android.com/jetpack/compose)
 
 A modern Android application template built with Kotlin and Jetpack Compose, designed to provide a solid foundation for list-based applications. It features local data storage using Room and image handling with PhotoPicker and Coil.
 
@@ -26,7 +26,7 @@ This template incorporates a basic structure for building adaptive user interfac
 *   **Responsive Layouts:** The UI is designed to adjust its layout based on the available screen width. For example, a typical list-detail scenario might display as a single pane (list navigates to detail) on smaller screens (phones) and transition to a two-pane layout (list and detail side-by-side) on larger screens (tablets, foldables, desktops).
 *   **Compose-Powered:** Leveraging the power of Jetpack Compose, screen configurations are typically determined at the Composable level, allowing ViewModels to remain largely unaware of specific display sizes.
 *   **Foundation for Growth:** While this template provides a foundational adaptive setup, it is designed to be easily extensible. You can build upon this base to implement more sophisticated adaptive behaviors and support a wider range of screen configurations as your application evolves.
-<!-- Further details on the specific implementation and how to extend the adaptive behavior can be found in the project's [Wiki](LINK_TO_YOUR_WIKI_PAGE_LATER). -->
+<!-- Further details on the specific implementation and how to extend the baseadaptive behavior can be found in the project's [Wiki](LINK_TO_YOUR_WIKI_PAGE_LATER). -->
 
 ## 🚀 Getting Started
 
@@ -77,7 +77,7 @@ This template follows the **MVVM (Model-View-ViewModel)** architectural pattern:
 
 ## 🧪 Testing
 
-The project includes a starter setup for (which is currently WIP):
+The project includes a starter setup for testing (which is currently WIP):
 
 *   **Unit Tests:** Located in `app/src/test/`. These test ViewModels and other business logic components using JUnit 4 and MockK. Turbine is used for testing Kotlin Flows.
     *   Run with: `./gradlew testDebugUnitTest`
