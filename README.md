@@ -15,18 +15,21 @@ A modern Android application template built with Kotlin and Jetpack Compose, des
     *   Image selection via [PhotoPicker](https://developer.android.com/training/data-storage/shared/photopicker).
     *   Efficient image loading and caching with [Coil](https://coil-kt.github.io/coil/).
 *   **MVVM Architecture:** Follows a Model-View-ViewModel pattern for a clear separation of concerns and testability.
-*   **Adaptive UI:** Basic support for different screen sizes (e.g., list-detail view on larger screens).
+*   **Adaptive UI:** Implements a list-detail view for different screen sizes using [Material 3 Adaptive components](https://m3.material.io/libraries/adaptive/overview), specifically `NavigableListDetailPaneScaffold`.
 *   **Testing:** Includes some examples for Unit and (optional) UI tests. (more to come)
 *   **Clean Code Principles:** Focus on readability and maintainability.
 
 ## 📱 Adaptive UI
 
-This template incorporates a basic structure for building adaptive user interfaces that respond to different screen sizes and orientations.
+This template utilizes Material 3 Adaptive components to create user interfaces that respond to different screen sizes and orientations, focusing on a common list-detail pattern.
 
-*   **Responsive Layouts:** The UI is designed to adjust its layout based on the available screen width. For example, a typical list-detail scenario might display as a single pane (list navigates to detail) on smaller screens (phones) and transition to a two-pane layout (list and detail side-by-side) on larger screens (tablets, foldables, desktops).
-*   **Compose-Powered:** Leveraging the power of Jetpack Compose, screen configurations are typically determined at the Composable level, allowing ViewModels to remain largely unaware of specific display sizes.
-*   **Foundation for Growth:** While this template provides a foundational adaptive setup, it is designed to be easily extensible. You can build upon this base to implement more sophisticated adaptive behaviors and support a wider range of screen configurations as your application evolves.
-<!-- Further details on the specific implementation and how to extend the baseadaptive behavior can be found in the project's [Wiki](LINK_TO_YOUR_WIKI_PAGE_LATER). -->
+*   **`NavigableListDetailPaneScaffold`:** The core of the adaptive layout is the `NavigableListDetailPaneScaffold`. This component from the Material 3 Adaptive library automatically adjusts the layout based on available screen width.
+    *   On **smaller screens** (like most phones in portrait mode), it typically displays a single pane (e.g., the list of items). Selecting an item navigates to its detail view, replacing the list.
+    *   On **larger screens** (like tablets, foldables, or phones in landscape mode), it can display two panes side-by-side: the list pane and the detail pane. Selecting an item in the list updates the content of the detail pane.
+*   **State-Driven Navigation:** The content of the detail pane is controlled by a custom `DetailPaneState` (which includes `ViewItem`, `EditItem`, and `Hidden` states), managed by the `rememberListDetailPaneScaffoldNavigator`. This allows for clear and testable navigation logic within the detail view.
+*   **Compose-Powered:** Screen configurations and pane management are handled declaratively in Jetpack Compose, allowing ViewModels to remain largely unaware of specific display sizes.
+
+This approach provides a robust foundation for building responsive list-detail interfaces that adapt to a wide range of devices.
 
 ## 🚀 Getting Started
 
@@ -39,8 +42,8 @@ This template incorporates a basic structure for building adaptive user interfac
 
 This template follows the **MVVM (Model-View-ViewModel)** architectural pattern:
 
-*   **View (Composables):** Observes `StateFlow` from the `ViewModel` and renders the UI. Sends user events to the `ViewModel`. The UI is designed to be adaptive, utilizing Jetpack Compose's capabilities to adjust layouts based on available screen width. For instance, list-detail patterns may be displayed as a single pane on smaller screens and a two-pane layout on larger screens.
-*   **ViewModel:** Holds UI-related state (exposed via `StateFlow`) and handles UI logic. Interacts with Repositories to fetch and save data. `ViewModel`s are lifecycle-aware and generally do not need to be aware of the specific screen configuration, as this is handled at the Composable level.
+*   **View (Composables):** Observes `StateFlow` from the `ViewModel` and renders the UI. Sends user events to the `ViewModel`.
+*   **ViewModel:** Holds UI-related state (exposed via `StateFlow`) and handles UI logic. Interacts with Repositories to fetch and save data. `ViewModel`s are lifecycle-aware and generally do not need to be aware of the specific screen configuration.
 *   **Model (Repositories & Data Sources):** Abstract the data sources (Room database, file system for images). Repositories provide a clean API for `ViewModel`s to access data.
 
 ## 🛠️ How To...
@@ -56,10 +59,13 @@ This template follows the **MVVM (Model-View-ViewModel)** architectural pattern:
     *   Adjust any mapping functions (e.g., `toItem()`, `fromItemEntry()`).
 3.  **Update UI & ViewModel:**
     *   Modify `ItemDetailsUiState.kt` and `HomeUiState.kt` (if the property is shown in the list) to include the new data.
+    *   Update `DetailPaneState.kt` if the new property affects the states managed by `NavigableListDetailPaneScaffold`.
     *   Update the `ViewModel`s (`HomeViewModel.kt`, `ItemDetailsViewModel.kt`) to handle the new property.
     *   Adjust Composable functions in `app/src/main/java/.../ui/screens/` to display or input the new property.
 
 ### Create a New Screen
+
+(This section primarily describes creating full-screen destinations outside the list-detail view. For new states within the detail pane, see `DetailPaneState.kt`)
 
 1.  **Define State:** Create a `data class` for your new screen's UI state (e.g., `NewScreenUiState.kt`).
 2.  **Create ViewModel:**
@@ -71,9 +77,9 @@ This template follows the **MVVM (Model-View-ViewModel)** architectural pattern:
     *   Observe the `ViewModel`'s state.
     *   Build your UI using Jetpack Compose components.
 4.  **Add Navigation:**
-    *   Define a new route in `app/src/main/java/.../ui/navigation/AppNavigation.kt`.
-    *   Add a `composable` destination for your new screen in the `NavHost`.
-    *   Implement navigation actions to and from your new screen.
+    *   Define a new route object for your screen (e.g., similar to `HomeDestination` or `ItemEntryDestination`, often placed in its own file or alongside the screen's Composable). This object typically defines at least a `route` string.
+    *   Add a new `composable` entry for this route within the `NavHost` in your main navigation setup (in `ListTemplateApp.kt`)
+    *   Implement navigation actions (e.g., using `navController.navigate(YourNewScreenDestination.route)`) in other parts of your app to navigate to and from your new screen.
 
 ## 🧪 Testing
 
