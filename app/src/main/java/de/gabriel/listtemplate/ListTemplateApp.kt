@@ -2,6 +2,7 @@ package de.gabriel.listtemplate
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -10,6 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.layout.AnimatedPane
 import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
+import androidx.compose.material3.adaptive.navigation.BackNavigationBehavior 
 import androidx.compose.material3.adaptive.navigation.NavigableListDetailPaneScaffold
 import androidx.compose.material3.adaptive.navigation.rememberListDetailPaneScaffoldNavigator
 import androidx.compose.runtime.Composable
@@ -50,6 +52,7 @@ fun ListTemplateApp(
             NavigableListDetailPaneScaffold<DetailPaneState>(
                 modifier = modifier,
                 navigator = listDetailPaneNavigator,
+                defaultBackBehavior = BackNavigationBehavior.PopUntilScaffoldValueChange,
                 listPane = {
                     AnimatedPane(modifier = Modifier) {
                         Column {
@@ -119,8 +122,8 @@ fun ListTemplateApp(
                                         },
                                         provideScaffold = false,
                                         topAppBarTitleText = stringResource(R.string.edit_item_title),
-                                        navigateBack = { navController.popBackStack() },
-                                        onNavigateUp = { navController.navigateUp() }
+                                        navigateBack = { navController.popBackStack() }, 
+                                        onNavigateUp = { navController.navigateUp() } 
                                     )
                                 }
                                 is DetailPaneState.Hidden, null -> {
@@ -129,7 +132,7 @@ fun ListTemplateApp(
                                             title = "Details",
                                             canNavigateBack = false
                                         )
-                                        androidx.compose.foundation.layout.Box(
+                                        Box(
                                             modifier = Modifier
                                                 .fillMaxSize()
                                                 .padding(16.dp),
@@ -144,7 +147,11 @@ fun ListTemplateApp(
                     }
                 }
             )
-            BackHandler(enabled = listDetailPaneNavigator.canNavigateBack()) {
+            
+            val isDetailPaneShowingContent = listDetailPaneNavigator.currentDestination?.contentKey.let { state ->
+                state is DetailPaneState.ViewItem || state is DetailPaneState.EditItem
+            }
+            BackHandler(enabled = isDetailPaneShowingContent) {
                 scope.launch {
                     listDetailPaneNavigator.navigateBack()
                 }
@@ -183,12 +190,10 @@ fun ListTemplateApp(
                 type = NavType.IntType
             })
         ) {
-            // Standalone-Aufruf von ItemEditScreen
             ItemEditScreen(
                 navigateBack = { navController.popBackStack() },
                 onNavigateUp = { navController.navigateUp() },
-                // itemIdFromPane und onDoneEditingInPane bleiben null (Standardwerte)
-                provideScaffold = true // Eigener Scaffold im Standalone-Modus
+                provideScaffold = true
             )
         }
     }
