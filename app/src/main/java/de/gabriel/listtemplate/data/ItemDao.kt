@@ -14,10 +14,10 @@ interface ItemDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insert(item: ItemEntry)
 
-    @Query("SELECT id, name, imageName FROM item WHERE id = :id")
+    @Query("SELECT * FROM item WHERE id = :id")
     fun getItem(id: Int): Flow<ItemEntry?>
 
-    @Query("SELECT id, name, imageName FROM item ORDER BY name ASC")
+    @Query("SELECT * FROM item ORDER BY name ASC")
     fun getAllItems(): Flow<List<ItemEntry>>
 
     @Update
