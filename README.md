@@ -51,17 +51,15 @@ This template follows the **MVVM (Model-View-ViewModel)** architectural pattern:
 ### Add a New List Item Property
 
 1.  **Update Room Entity:**
-    *   Open `app/src/main/java/.../data/local/ItemEntry.kt`.
+    *   Open `app/src/main/java/.../data/ItemEntry.kt`.
     *   Add the new property to the `ItemEntry` data class and ensure it's reflected in the `@Entity` definition if it's a new column.
     *   If it's a schema change, create a new Room migration.
-2.  **Update Data Model (if separate):**
-    *   If you have a domain `Item.kt` model, update it accordingly.
+2.  **Update Data Model:**
+    *   Update `Item.kt` to include the new property.
     *   Adjust any mapping functions (e.g., `toItem()`, `fromItemEntry()`).
-3.  **Update UI & ViewModel:**
-    *   Modify `ItemDetailsUiState.kt` and `HomeUiState.kt` (if the property is shown in the list) to include the new data.
-    *   Update `DetailPaneState.kt` if the new property affects the states managed by `NavigableListDetailPaneScaffold`.
-    *   Update the `ViewModel`s (`HomeViewModel.kt`, `ItemDetailsViewModel.kt`) to handle the new property.
-    *   Adjust Composable functions in `app/src/main/java/.../ui/screens/` to display or input the new property.
+3.  **Update UI & ViewModels:**
+    *   Update ItemDetails and extension functions in `ItemEntryViewModel.kt` (and also the function `validateInput` if needed)
+    *   Adjust Composable functions `ItemEntryScreen.kt` and `ItemDetailsScreen.kt` to display and handle the new property.
 
 ### Create a New Screen
 
@@ -77,8 +75,8 @@ This template follows the **MVVM (Model-View-ViewModel)** architectural pattern:
     *   Observe the `ViewModel`'s state.
     *   Build your UI using Jetpack Compose components.
 4.  **Add Navigation:**
-    *   Define a new route object for your screen (e.g., similar to `HomeDestination` or `ItemEntryDestination`, often placed in its own file or alongside the screen's Composable). This object typically defines at least a `route` string.
-    *   Add a new `composable` entry for this route within the `NavHost` in your main navigation setup (in `ListTemplateApp.kt`)
+    *   Define a new route object for your screen (similar to `HomeDestination` or `ItemEntryDestination`). This object typically defines at least a `route` string.
+    *   Add a new `composable` entry for this route within the `NavHost` in your main navigation setup (in `ListRandomizerApp.kt`)
     *   Implement navigation actions (e.g., using `navController.navigate(YourNewScreenDestination.route)`) in other parts of your app to navigate to and from your new screen.
 
 ## 🧪 Testing
