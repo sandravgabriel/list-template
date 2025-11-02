@@ -4,9 +4,18 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.layout.AnimatedPane
@@ -17,6 +26,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
@@ -53,25 +63,43 @@ fun ListTemplateApp(
                 navigator = listDetailPaneNavigator,
                 listPane = {
                     AnimatedPane(modifier = Modifier) {
-                        Column {
-                            TopAppBar(
-                                title = "Items",
-                                canNavigateBack = false
-                            )
-                            HomeScreen(
-                                navigateToItemEntry = {
-                                    navController.navigate(ItemEntryDestination.route)
-                                },
-                                onItemClick = { itemId ->
-                                    scope.launch {
-                                        listDetailPaneNavigator.navigateTo(
-                                            ListDetailPaneScaffoldRole.Detail,
-                                            DetailPaneState.ViewItem(itemId)
-                                        )
-                                    }
-                                },
-                                provideScaffold = false
-                            )
+                        Box(modifier = Modifier.fillMaxSize()) {
+                            Column {
+                                TopAppBar(
+                                    title = "Items",
+                                    canNavigateBack = false
+                                )
+                                HomeScreen(
+                                    onItemClick = { itemId ->
+                                        scope.launch {
+                                            listDetailPaneNavigator.navigateTo(
+                                                ListDetailPaneScaffoldRole.Detail,
+                                                DetailPaneState.ViewItem(itemId)
+                                            )
+                                        }
+                                    },
+                                )
+                            }
+                            FloatingActionButton(
+                                onClick = { navController.navigate(ItemEntryDestination.route) },
+                                shape = MaterialTheme.shapes.medium,
+                                modifier = Modifier
+                                    .align(Alignment.BottomEnd)
+                                    .padding(16.dp)
+                                    .padding(
+                                        end = WindowInsets.safeDrawing
+                                            .asPaddingValues()
+                                            .calculateEndPadding(LocalLayoutDirection.current),
+                                        bottom = WindowInsets.safeDrawing
+                                            .asPaddingValues()
+                                            .calculateBottomPadding()
+                                    )
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Add,
+                                    contentDescription = stringResource(R.string.item_entry_title)
+                                )
+                            }
                         }
                     }
                 },
@@ -164,8 +192,7 @@ fun ListTemplateApp(
             }
             BackHandler(enabled = isDetailPaneShowingContent) {
                 scope.launch {
-                    val currentKey = listDetailPaneNavigator.currentDestination?.contentKey
-                    when (currentKey) {
+                    when (val currentKey = listDetailPaneNavigator.currentDestination?.contentKey) {
                         is DetailPaneState.EditItem -> {
                             listDetailPaneNavigator.navigateTo(
                                 ListDetailPaneScaffoldRole.Detail,

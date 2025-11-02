@@ -8,28 +8,35 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+    primary = Blue80,
+    secondary = BlueGrey80,
+    tertiary = LightBlue80,
+    surface = DarkSurface,
+    onSurface = LightText,
+    background = DarkSurface,
+    onBackground = LightText,
+    primaryContainer = Blue40,
+    secondaryContainer = Blue40,
+    onPrimaryContainer = Blue80,
+    scrim = Color.Black.copy(alpha = 0.3f)
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+    primary = Blue40,
+    secondary = BlueGrey40,
+    tertiary = LightBlue40,
+    surface = Color(0xFFFDFBFF),
+    onSurface = Color.Black,
+    background = Color(0xFFFDFBFF),
+    onBackground = Color.Black,
+    primaryContainer = Blue80,
+    secondaryContainer = Blue80,
+    onPrimaryContainer = Blue40,
+    scrim = Color.Black.copy(alpha = 0.3f)
 )
 
 @Composable
@@ -42,7 +49,25 @@ fun ListTemplateTheme(
     val colorScheme = when {
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+            if (darkTheme) {
+                val dynamicDark = dynamicDarkColorScheme(context)
+                dynamicDark.copy(
+                    // Unify surface and background for a seamless look
+                    surface = dynamicDark.background,
+                    // Unify container colors for consistency
+                    secondaryContainer = dynamicDark.primaryContainer,
+                    // Use a consistent scrim
+                    scrim = Color.Black.copy(alpha = 0.3f)
+                )
+            } else {
+                val dynamicLight = dynamicLightColorScheme(context)
+                dynamicLight.copy(
+                    // Unify container colors for consistency
+                    secondaryContainer = dynamicLight.primaryContainer,
+                    // Use a consistent scrim
+                    scrim = Color.Black.copy(alpha = 0.3f)
+                )
+            }
         }
 
         darkTheme -> DarkColorScheme

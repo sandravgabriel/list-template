@@ -29,6 +29,7 @@ androidxTestCore = "1.7.0" # (kann für Robolectric nützlich sein, bringt Andro
 
 # Other Libraries
 coil = "2.7.0"
+foundationLayout = "1.9.4"
 
 [libraries]
 # AndroidX Libraries
@@ -70,6 +71,7 @@ androidx-test-core-ktx = { group = "androidx.test", name = "core-ktx", version.r
 
 # Other Libraries
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coil" }
+androidx-compose-foundation-layout = { group = "androidx.compose.foundation", name = "foundation-layout", version.ref = "foundationLayout" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
