@@ -57,12 +57,12 @@ fun HomeScreen(
     viewModel: HomeViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
     val homeUiState by viewModel.homeUiState.collectAsState()
-        HomeBody(
-            itemList = homeUiState.itemList,
-                onItemClick = onItemClick,
-                modifier = modifier
-                    .fillMaxSize()
-            )
+    HomeBody(
+        itemList = homeUiState.itemList,
+        onItemClick = onItemClick,
+        modifier = modifier
+            .fillMaxSize()
+    )
 }
 
 @Composable
