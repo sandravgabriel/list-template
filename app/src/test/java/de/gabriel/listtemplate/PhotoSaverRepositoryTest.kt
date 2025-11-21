@@ -27,45 +27,35 @@ import java.io.FileNotFoundException
 @Config(sdk = [Config.OLDEST_SDK])
 class PhotoSaverRepositoryTest {
 
-    // StandardTestDispatcher ist oft besser für vorhersagbare Tests als UnconfinedTestDispatcher,
-    // da er mehr Kontrolle über die Ausführungsreihenfolge gibt.
     private val testDispatcher = StandardTestDispatcher()
 
     private lateinit var repository: PhotoSaverRepository
     private lateinit var mockContentResolver: ContentResolver
     private lateinit var context: Context
 
-    // TemporaryFolder Rule ist eine gute Praxis für das Management von Testdateien und -ordnern.
-    // Es stellt sicher, dass die Ordner nach jedem Test (oder nach der Testklasse) aufgeräumt werden.
     @get:Rule
     val tempFolder = TemporaryFolder()
 
     private lateinit var testCacheDirInTemp: File
     private lateinit var testFilesDirInTemp: File
 
-    // Dummy URI und Daten für Tests
     private val testUri: Uri = Uri.parse("content://com.example.test/dummy")
     private val testPhotoData = "This is a test photo content."
     private val testPhotoBytes = testPhotoData.toByteArray()
 
     @Before
     fun setUp() {
-        Dispatchers.setMain(testDispatcher) // Hauptdispatcher für Coroutines setzen
+        Dispatchers.setMain(testDispatcher)
 
         context = ApplicationProvider.getApplicationContext()
         mockContentResolver = mockk()
 
-        // Erstelle Unterverzeichnisse im TemporaryFolder, die die Struktur von cacheDir/filesDir simulieren
         testCacheDirInTemp = tempFolder.newFolder("cache")
         testFilesDirInTemp = tempFolder.newFolder("files")
 
-        // Erstelle die "photos"-Unterordner, die das Repository erwartet
         File(testCacheDirInTemp, "photos").mkdirs()
         File(testFilesDirInTemp, "photos").mkdirs()
 
-        // Erstelle einen Spy vom Robolectric Context, um cacheDir und filesDir zu überschreiben,
-        // damit sie auf unsere temporären Ordner zeigen.
-        // Das ist ein Weg, dem Repository kontrollierte Pfade unterzujubeln, ohne das Repository selbst ändern zu müssen.
         val spiedContext = spyk(context) {
             every { cacheDir } returns testCacheDirInTemp
             every { filesDir } returns testFilesDirInTemp
@@ -77,12 +67,10 @@ class PhotoSaverRepositoryTest {
 
     @After
     fun tearDown() {
-        Dispatchers.resetMain() // Coroutine-Dispatcher zurücksetzen
-        // tempFolder.delete() wird automatisch durch die @Rule aufgerufen,
-        // sodass eine manuelle Löschung der Ordner meist nicht nötig ist.
+        Dispatchers.resetMain()
     }
 
-    // --- Tests für generatePhotoCacheFile ---
+    // --- Test für generatePhotoCacheFile ---
     @Test
     fun `generatePhotoCacheFile should return file in correct cache photos directory`() {
         val file = repository.generatePhotoCacheFile()
