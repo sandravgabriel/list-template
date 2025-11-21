@@ -72,6 +72,7 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation(libs.coil.compose)
     implementation(libs.material)
+    implementation(libs.androidx.compose.material.icons.extended.android)
     //Room
     implementation(libs.androidx.room.runtime)
     ksp(libs.androidx.room.compiler)
@@ -86,5 +87,7 @@ dependencies {
     testImplementation(libs.robolectric)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.androidx.test.core.ktx) // AndroidX Test Core - nützlich für das Holen von ApplicationContext in Robolectric-Tests
+    testImplementation(libs.mockito.kotlin)
+    testImplementation(libs.turbine)
     // testImplementation(libs.androidx.test.rules)
 }
