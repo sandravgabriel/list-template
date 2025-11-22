@@ -1,7 +1,7 @@
 [versions]
 # Gradle Plugins
 agp = "8.13.1"
-kotlin = "2.2.21"
+kotlin = "2.2.0"
 ksp = "2.2.0-2.0.2"
 
 # AndroidX Libraries
@@ -31,7 +31,7 @@ androidxTestCore = "1.7.0" # (kann für Robolectric nützlich sein, bringt Andro
 # Other Libraries
 coil = "2.7.0"
 foundationLayout = "1.9.5"
-mockitoKotlin = "6.1.0"
+mockitoKotlin = "5.2.1"
 turbine = "1.2.1"
 
 [libraries]

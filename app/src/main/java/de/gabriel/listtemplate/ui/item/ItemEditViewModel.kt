@@ -24,11 +24,11 @@ class ItemEditViewModel(
     var itemUiState by mutableStateOf(ItemUiState())
         private set
 
-    private var currentItemId: Int? = null // Hält die ID des zu bearbeitenden Items
+    private var currentItemId: Int? = null
 
     init {
         val navArgItemId: Int? = savedStateHandle[ItemEditDestination.ITEM_ID_ARG]
-        if (navArgItemId != null && navArgItemId > 0) { // Stelle sicher, dass die ID gültig ist
+        if (navArgItemId != null && navArgItemId > 0) {
             initializeWithItemId(navArgItemId)
         } else {
             // Wenn keine gültige ID aus NavArgs kommt, wird das ViewModel möglicherweise
@@ -58,7 +58,7 @@ class ItemEditViewModel(
                 itemUiState = ItemUiState(
                     itemDetails = initialItemDetails,
                     isEntryValid = validateInput(initialItemDetails),
-                    localPickerPhoto = null // Wichtig: Für ein bestehendes Item explizit zurücksetzen
+                    localPickerPhoto = null // Für ein bestehendes Item explizit zurücksetzen
                 )
                 Log.d("ItemEditViewModel", "Item $itemId geladen: ${initialItemDetails.name}")
             } else {

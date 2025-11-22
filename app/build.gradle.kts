@@ -89,5 +89,4 @@ dependencies {
     testImplementation(libs.androidx.test.core.ktx) // AndroidX Test Core - nützlich für das Holen von ApplicationContext in Robolectric-Tests
     testImplementation(libs.mockito.kotlin)
     testImplementation(libs.turbine)
-    // testImplementation(libs.androidx.test.rules)
 }
