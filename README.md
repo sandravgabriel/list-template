@@ -16,7 +16,7 @@ A modern Android application template built with Kotlin and Jetpack Compose, des
     *   Efficient image loading and caching with [Coil](https://coil-kt.github.io/coil/).
 *   **MVVM Architecture:** Follows a Model-View-ViewModel pattern for a clear separation of concerns and testability.
 *   **Adaptive UI:** Implements a list-detail view for different screen sizes using [Material 3 Adaptive components](https://m3.material.io/libraries/adaptive/overview), specifically `NavigableListDetailPaneScaffold`.
-*   **Testing:** Includes some examples for Unit and (optional) UI tests. (more to come)
+*   **Testing:** Includes some examples for Unit and UI tests. (more to come)
 *   **Clean Code Principles:** Focus on readability and maintainability.
 
 ## 📱 Adaptive UI
@@ -81,9 +81,7 @@ This template follows the **MVVM (Model-View-ViewModel)** architectural pattern:
 
 ## 🧪 Testing
 
-The project includes a starter setup for testing (which is currently WIP):
+The project includes a starter setup for testing:
 
 *   **Unit Tests:** Located in `app/src/test/`. These test ViewModels and other business logic components using JUnit 4 and MockK. Turbine is used for testing Kotlin Flows.
-    *   Run with: `./gradlew testDebugUnitTest`
 *   **Instrumented/UI Tests (Optional - if you add them):** Located in `app/src/androidTest/`.
-    *   Run with: `./gradlew connectedAndroidTest`
